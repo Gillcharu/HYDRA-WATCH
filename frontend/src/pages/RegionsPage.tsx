@@ -45,18 +45,24 @@ export function RegionsPage() {
       r.country.toLowerCase().includes(search.toLowerCase()),
   );
 
+  const filteredPoints = provider
+    ? points.filter((p) => p.provider.toLowerCase() === provider.toLowerCase())
+    : points;
+
   return (
     <div className="px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-7xl">
         <FadeIn>
           <div className="section-label">Coverage</div>
-          <h1 className="font-display text-3xl font-bold text-white sm:text-4xl">121 cloud regions</h1>
+          <h1 className="font-display text-3xl font-bold text-white sm:text-4xl">
+            {provider ? `Showing ${filtered.length} ${provider} regions` : `${allRegions.length} cloud regions`}
+          </h1>
           <p className="mt-2 text-slate-400">Every major cloud zone — water stress, grid carbon, and sustainability score.</p>
         </FadeIn>
 
         <FadeIn delay={0.1}>
           <div className="mt-8 overflow-hidden rounded-2xl border border-white/10">
-            <WorldMap points={points} />
+            <WorldMap points={filteredPoints} />
           </div>
         </FadeIn>
 
@@ -101,41 +107,49 @@ export function RegionsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((r, i) => (
-                  <motion.tr
-                    key={`${r.provider}-${r.region_code}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: Math.min(i * 0.02, 0.5) }}
-                    className="border-b border-white/[0.03] transition hover:bg-white/[0.03]"
-                  >
-                    <td className="px-5 py-4">
-                      <div className="font-medium text-white">{r.region_name}</div>
-                      <div className="font-mono text-[10px] text-slate-500">{r.region_code}</div>
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-8 text-center text-slate-500 font-mono text-xs">
+                      No regions match this filter.
                     </td>
-                    <td className="px-5 py-4">
-                      <span
-                        className="rounded-md px-2 py-0.5 text-xs font-bold"
-                        style={{ backgroundColor: `${PROVIDER_COLORS[r.provider] ?? "#666"}22`, color: PROVIDER_COLORS[r.provider] ?? "#94a3b8" }}
-                      >
-                        {r.provider}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-slate-400">{r.country}</td>
-                    <td className="px-5 py-4 font-mono text-amber-400/90">{r.carbon_kg_per_kwh}</td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-white/10">
-                          <div
-                            className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-amber-500"
-                            style={{ width: `${Math.min(100, (r.water_stress_score / 5) * 100)}%` }}
-                          />
+                  </tr>
+                ) : (
+                  filtered.map((r, i) => (
+                    <motion.tr
+                      key={`${r.provider}-${r.region_code}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: Math.min(i * 0.02, 0.5) }}
+                      className="border-b border-white/[0.03] transition hover:bg-white/[0.03]"
+                    >
+                      <td className="px-5 py-4">
+                        <div className="font-medium text-white">{r.region_name}</div>
+                        <div className="font-mono text-[10px] text-slate-500">{r.region_code}</div>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className="rounded-md px-2 py-0.5 text-xs font-bold"
+                          style={{ backgroundColor: `${PROVIDER_COLORS[r.provider] ?? "#666"}22`, color: PROVIDER_COLORS[r.provider] ?? "#94a3b8" }}
+                        >
+                          {r.provider}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-slate-400">{r.country}</td>
+                      <td className="px-5 py-4 font-mono text-amber-400/90">{r.carbon_kg_per_kwh}</td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-white/10">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-amber-500"
+                              style={{ width: `${Math.min(100, (r.water_stress_score / 5) * 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-slate-500">{r.water_stress_score.toFixed(2)}/5</span>
                         </div>
-                        <span className="text-slate-500">{r.water_stress_score}/5</span>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
+                      </td>
+                    </motion.tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

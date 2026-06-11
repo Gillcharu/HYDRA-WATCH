@@ -346,10 +346,10 @@ export function PlatformPage() {
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-abyss-950 border-t-transparent" />
-                    Analyzing…
+                    Generating…
                   </span>
                 ) : (
-                  "Analyze detected workload"
+                  "Generate recommendation"
                 )}
               </button>
               {error && <p className="text-sm text-red-400">{error}</p>}
@@ -429,7 +429,7 @@ export function PlatformPage() {
                         <div className="space-y-1">
                           <div className="text-[10px] font-bold uppercase tracking-wider text-mint-400">Recommended Action</div>
                           <h3 className="font-display text-base font-semibold text-white sm:text-lg">
-                            Best action: Move <span className="text-aqua-300 font-extrabold">{DETECTED_WORKLOADS.find(w => w.id === activeWorkload)?.name || "your workload"}</span> from{" "}
+                            Recommended action: Move <span className="text-aqua-300 font-extrabold">{DETECTED_WORKLOADS.find(w => w.id === activeWorkload)?.name || "your workload"}</span> from{" "}
                             <span className="text-slate-200 font-bold">{formatRegionName(result.current.provider, result.current.region_name)}</span> to{" "}
                             <span className="text-mint-300 font-bold bg-mint-500/10 px-2 py-0.5 rounded border border-mint-500/20">{formatRegionName(result.multicloud[0].provider, result.multicloud[0].region_name)}</span>
                           </h3>

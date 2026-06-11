@@ -82,7 +82,7 @@ export function HomePage() {
           <FadeIn delay={0.2}>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-400">
               HydraWatch models water, carbon, and cost for every major cloud region — then recommends greener
-              alternatives within your latency budget. The decision layer investors and infra teams have been missing.
+              alternatives within your latency budget. The decision layer infrastructure, ESG, and risk teams have been missing.
             </p>
           </FadeIn>
 

@@ -104,7 +104,7 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
               <div className="rounded-lg bg-white/5 p-2">
                 <div className="text-slate-500">Water</div>
                 <div className="font-mono font-bold text-white text-[10px] leading-tight">
-                  {active.water_stress === 0 ? "Low water stress" : `${active.water_stress}/5`}
+                  {active.water_stress === 0 ? "Low water stress" : `${active.water_stress.toFixed(2)}/5`}
                 </div>
               </div>
               <div className="rounded-lg bg-white/5 p-2">
