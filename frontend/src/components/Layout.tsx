@@ -95,10 +95,15 @@ export function Layout() {
             </div>
           </div>
           <div>
-            <div className="section-label">Methodology</div>
+            <div className="section-label">Methodology & Feedback</div>
             <p className="mt-3 text-sm text-slate-500">
               v3.0 · MLPerf energy · IEA/eGRID carbon · V0–V4 trust tiers · MIT License
             </p>
+            <div className="mt-4 flex gap-4 text-xs text-slate-400">
+              <a href="mailto:contact@hydrawatch.com" className="hover:text-aqua-400">Contact Us</a>
+              <span className="text-slate-700">|</span>
+              <a href="https://github.com/Gillcharu/HYDRA-WATCH" target="_blank" rel="noreferrer" className="hover:text-aqua-400">Feedback / GitHub</a>
+            </div>
           </div>
         </div>
         <div className="mx-auto mt-10 max-w-7xl border-t border-white/5 px-4 pt-6 text-center text-xs text-slate-600 sm:px-6">
