@@ -6,6 +6,15 @@ import { FadeIn } from "../components/AnimatedCounter";
 import { api } from "../lib/api";
 import type { AnalyzeRequest, AnalyzeResult, Meta, Region, Scenario } from "../types";
 
+function formatRegionName(provider: string, name: string) {
+  let cleanName = name;
+  const match = name.match(/\(([^)]+)\)/);
+  if (match) {
+    cleanName = match[1];
+  }
+  return `${provider} ${cleanName}`;
+}
+
 const DEFAULT: AnalyzeRequest = {
   provider: "AWS",
   region_code: "ap-south-1",
@@ -198,10 +207,10 @@ export function PlatformPage() {
                 <div className="mt-2 font-semibold text-white">{workload.name}</div>
                 <div className="mt-1 text-xs text-slate-500">{workload.owner}</div>
                 <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-slate-400">
-                  <span>{workload.params.provider} · {workload.params.region_code}</span>
+                   <span>{workload.params.provider} · {workload.params.region_code}</span>
                   <span>{workload.params.gpu_type}</span>
                   <span>{workload.params.model_name}</span>
-                  <span>{workload.params.qps} QPS detected</span>
+                  <span>~{(workload.params.qps * 0.0864).toFixed(1)}M requests/day</span>
                 </div>
               </button>
             ))}
@@ -216,11 +225,11 @@ export function PlatformPage() {
             <div className="mt-5 space-y-4">
               <div className="grid gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm">
                 {[
-                  ["Provider", params.provider],
+                   ["Provider", params.provider],
                   ["Region", params.region_code],
                   ["Model", params.model_name],
                   ["GPU", params.gpu_type],
-                  ["Traffic", `${params.qps} QPS · ${params.avg_tokens} tokens`],
+                  ["Traffic", `~${(params.qps * 0.0864).toFixed(1)}M req/day · ${params.avg_tokens.toLocaleString()} tokens/req`],
                   ["Users", `${params.user_location} · ${params.max_latency_ms} ms SLA`],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between gap-4">
@@ -297,11 +306,11 @@ export function PlatformPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="label-dark">Detected QPS</label>
+                      <label className="label-dark">Traffic (QPS)</label>
                       <input type="number" className="input-dark" value={params.qps} onChange={(e) => setParams({ ...params, qps: +e.target.value })} />
                     </div>
                     <div>
-                      <label className="label-dark">Detected tokens</label>
+                      <label className="label-dark">Request size (tokens)</label>
                       <input type="number" className="input-dark" value={params.avg_tokens} onChange={(e) => setParams({ ...params, avg_tokens: +e.target.value })} />
                     </div>
                   </div>
@@ -358,7 +367,7 @@ export function PlatformPage() {
                   exit={{ opacity: 0 }}
                   className="space-y-6"
                 >
-                  {/* Water Table Basin Depletion Warning */}
+                  {/* Water table basin stress warning */}
                   {result.current.water_stress_score !== undefined && result.current.water_stress_score > 3.0 && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
@@ -373,10 +382,10 @@ export function PlatformPage() {
                           </svg>
                         </div>
                         <div className="space-y-2">
-                          <h3 className="font-display font-bold text-red-200">CRITICAL: Severe Water Basin Depletion Warning</h3>
+                          <h3 className="font-display font-bold text-red-200">High Water Stress Alert</h3>
                           <p className="text-sm text-red-300/90 leading-relaxed">
                             The regional water tables in <strong>{result.current.region_name} ({result.current.region_code})</strong> are experiencing severe depletion.
-                            High seasonal heat and heavy municipal/industrial demand have placed local water basins in critical stress. Running dense AI compute workloads here status-warns grid/cooling water consumption and threatens local water tables.
+                            High seasonal heat and heavy municipal/industrial demand have placed local water basins in critical stress. Running dense AI compute workloads here increases grid and cooling-water demand in an already constrained region.
                           </p>
                           <div className="grid gap-3 pt-2 sm:grid-cols-3">
                             <div className="rounded-lg bg-black/30 p-3 border border-white/5">
@@ -391,13 +400,39 @@ export function PlatformPage() {
                             </div>
                             <div className="rounded-lg bg-black/30 p-3 border border-white/5">
                               <span className="block text-[10px] uppercase tracking-wider text-slate-500">Local Reservoirs</span>
-                              <strong className="font-display text-sm text-red-300 font-bold">CRITICAL LEVEL</strong>
+                              <strong className="font-display text-sm text-red-300 font-bold">HIGH STRESS</strong>
                               <span className="block text-xs text-slate-400">Restricted usage active</span>
                             </div>
                           </div>
                           <div className="mt-4 rounded-lg bg-red-950/20 p-3 border border-red-500/10 text-xs text-red-200">
                             <strong>Dispatch Action Prompted:</strong> High-risk workload detected. We recommend dispatching this workload to a low water-stress alternative, such as <strong>{result.multicloud[0]?.region_name || "eu-north-1 (Stockholm)"}</strong> to preserve vital local freshwater tables.
                           </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                   {/* Top Action Recommendation Callout */}
+                  {result.multicloud.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="relative overflow-hidden rounded-2xl border border-mint-500/30 bg-gradient-to-r from-mint-950/40 to-abyss-950/50 p-6 backdrop-blur-md shadow-lg shadow-mint-950/20"
+                    >
+                      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-mint-500/10 blur-2xl animate-pulse" />
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-mint-500/20 text-mint-400 border border-mint-500/30 shadow-inner">
+                          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-mint-400">Recommended Action</div>
+                          <h3 className="font-display text-base font-semibold text-white sm:text-lg">
+                            Best action: Move <span className="text-aqua-300 font-extrabold">{DETECTED_WORKLOADS.find(w => w.id === activeWorkload)?.name || "your workload"}</span> from{" "}
+                            <span className="text-slate-200 font-bold">{formatRegionName(result.current.provider, result.current.region_name)}</span> to{" "}
+                            <span className="text-mint-300 font-bold bg-mint-500/10 px-2 py-0.5 rounded border border-mint-500/20">{formatRegionName(result.multicloud[0].provider, result.multicloud[0].region_name)}</span>
+                          </h3>
                         </div>
                       </div>
                     </motion.div>
@@ -439,6 +474,9 @@ export function PlatformPage() {
                             <div className="mt-1 text-[10px] uppercase tracking-wider text-slate-500">{m.label}</div>
                           </div>
                         ))}
+                        <div className="col-span-3 border-t border-white/5 bg-white/[0.02] py-2 text-center text-[10px] font-mono text-slate-400">
+                          Modeled estimate for decision support
+                        </div>
                       </div>
                     </div>
                   </div>

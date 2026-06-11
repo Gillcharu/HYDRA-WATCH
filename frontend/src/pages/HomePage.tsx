@@ -10,33 +10,33 @@ import type { MapPoint } from "../types";
 
 const BENTO = [
   {
-    icon: "🌍",
+    icon: "RG",
     title: "121 regions · 7 clouds",
     desc: "AWS, GCP, Azure, OCI, IBM, Alibaba, DigitalOcean — every zone scored for water stress, WUE, and grid carbon.",
     span: "lg:col-span-2",
   },
   {
-    icon: "☁️",
+    icon: "PX",
     title: "Cross-cloud Pareto",
     desc: "Optimal region across all providers within your latency SLA — with migration cost modeling.",
     span: "",
   },
   {
-    icon: "🔒",
+    icon: "V4",
     title: "V0→V4 verification",
     desc: "From TDP heuristics to MLPerf benchmarks to metered CCFT ground truth.",
     span: "",
   },
   {
-    icon: "⏰",
+    icon: "24H",
     title: "Carbon scheduling",
     desc: "Hourly grid patterns — shift batch jobs to cleaner hours globally.",
     span: "",
   },
   {
-    icon: "📡",
+    icon: "API",
     title: "Live telemetry",
-    desc: "CloudWatch, access logs, billing CSV — no manual QPS guessing.",
+    desc: "CloudWatch, access logs, billing CSV — no manual traffic guessing.",
     span: "lg:col-span-2",
   },
 ];
@@ -103,7 +103,7 @@ export function HomePage() {
               {[
                 { label: "Cloud regions", value: stats.regions },
                 { label: "Providers", value: stats.providers },
-                { label: "Carbon validated", value: stats.passRate, suffix: "%" },
+                { label: "Data checks passing", value: stats.passRate, suffix: "%" },
                 { label: "User locations", value: 40, suffix: "+" },
               ].map((s) => (
                 <div key={s.label} className="glass rounded-2xl p-5">
@@ -146,7 +146,7 @@ export function HomePage() {
                   whileHover={{ y: -4 }}
                   className={`bento-card h-full ${f.span}`}
                 >
-                  <div className="text-3xl">{f.icon}</div>
+                  <div className="inline-flex h-10 min-w-10 items-center justify-center rounded-lg border border-aqua-500/20 bg-aqua-500/10 px-2 font-mono text-xs font-bold text-aqua-300">{f.icon}</div>
                   <h3 className="mt-4 font-display text-lg font-bold text-white">{f.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-400">{f.desc}</p>
                 </motion.div>

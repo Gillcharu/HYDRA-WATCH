@@ -118,7 +118,8 @@ def meta():
 def list_regions(provider: Optional[str] = Query(None)):
     df = load_regions()
     if provider:
-        df = df[df["provider"] == provider.upper()]
+        provider_key = provider.strip().casefold()
+        df = df[df["provider"].astype(str).str.casefold() == provider_key]
     return {"count": len(df), "regions": df.to_dict(orient="records")}
 
 
@@ -298,11 +299,6 @@ def export_terraform(
 
 
 # Legacy routes (backward compatible)
-@app.get("/regions")
-def list_regions_legacy(provider: Optional[str] = Query(None)):
-    return list_regions(provider)
-
-
 @app.get("/locations")
 def list_locations_legacy():
     return list_locations()
@@ -311,16 +307,6 @@ def list_locations_legacy():
 @app.post("/analyze")
 async def analyze_legacy(req: AnalyzeRequest, top_n: int = Query(10, ge=1, le=121)):
     return await analyze(req, top_n)
-
-
-@app.get("/leaderboard")
-def leaderboard_legacy(
-    user_location: str = Query("Mumbai, India"),
-    qps: float = Query(100, ge=1),
-    max_latency_ms: int = Query(200, ge=50, le=500),
-    top_n: int = Query(20, ge=1, le=121),
-):
-    return leaderboard(user_location, qps, 1000, "A100", "LLaMA-3-70B", max_latency_ms, top_n)
 
 
 @app.get("/validate/all")

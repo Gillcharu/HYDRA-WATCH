@@ -17,7 +17,7 @@ export function Layout() {
     <div className="relative flex min-h-screen flex-col">
       <MeshBackground />
 
-      <header className="sticky top-0 z-50 border-b border-white/5">
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-abyss-950/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <Link to="/" className="group flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-aqua-500 to-mint-500 text-lg font-bold text-abyss-950 shadow-lg shadow-aqua-500/20 transition group-hover:scale-105">

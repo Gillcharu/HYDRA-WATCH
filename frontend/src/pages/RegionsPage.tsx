@@ -16,6 +16,7 @@ const PROVIDER_COLORS: Record<string, string> = {
 };
 
 export function RegionsPage() {
+  const [allRegions, setAllRegions] = useState<Region[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
   const [points, setPoints] = useState<MapPoint[]>([]);
   const [provider, setProvider] = useState("");
@@ -23,13 +24,20 @@ export function RegionsPage() {
 
   useEffect(() => {
     api.mapPoints().then((d) => setPoints(d.points)).catch(console.error);
+    api.regions().then((d) => {
+      setAllRegions(d.regions);
+      setRegions(d.regions);
+    }).catch(console.error);
   }, []);
 
   useEffect(() => {
-    api.regions(provider || undefined).then((d) => setRegions(d.regions)).catch(console.error);
-  }, [provider]);
+    const nextRegions = provider
+      ? allRegions.filter((r) => r.provider.toLowerCase() === provider.toLowerCase())
+      : allRegions;
+    setRegions(nextRegions);
+  }, [allRegions, provider]);
 
-  const providers = [...new Set(regions.map((r) => r.provider))].sort();
+  const providers = [...new Set(allRegions.map((r) => r.provider))].sort();
   const filtered = regions.filter(
     (r) =>
       !search ||
