@@ -8,10 +8,25 @@ function scoreColor(score: number): string {
   return "#ef4444"; // red
 }
 
+function getDotColor(point: MapPoint, layer: "score" | "water" | "carbon"): string {
+  if (layer === "water") {
+    if (point.water_stress <= 1.5) return "#14b8a6"; // low (mint/cyan)
+    if (point.water_stress <= 3.5) return "#f59e0b"; // moderate (amber)
+    return "#ef4444"; // critical (red)
+  }
+  if (layer === "carbon") {
+    if (point.carbon <= 0.15) return "#14b8a6"; // low (mint/cyan)
+    if (point.carbon <= 0.45) return "#f59e0b"; // moderate (amber)
+    return "#ef4444"; // high (red)
+  }
+  return scoreColor(point.score);
+}
+
 export function WorldMap({ points }: { points: MapPoint[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<MapPoint | null>(null);
+  const [layer, setLayer] = useState<"score" | "water" | "carbon">("score");
 
   // Rotation angles (in radians)
   const rotationY = useRef(3.5); // spin
@@ -165,7 +180,7 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
       projectedDots.sort((a, b) => a.z - b.z);
 
       projectedDots.forEach((d) => {
-        const color = scoreColor(d.point.score);
+        const color = getDotColor(d.point, layer);
         const isActive = active?.region_code === d.point.region_code;
         const isHovered = hoveredIndex.current === d.index;
 
@@ -209,7 +224,7 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
       window.removeEventListener("resize", resizeCanvas);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [points, active]);
+  }, [points, active, layer]);
 
   // Mouse / Touch handlers for dragging
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -340,6 +355,26 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
         <div className="text-[10px] text-slate-500 font-mono mt-0.5">Drag to spin globe · Hover dots</div>
       </div>
 
+      {/* Interactive Layer Toggles */}
+      <div className="absolute right-4 top-4 glass rounded-xl p-1 flex gap-1 z-10 pointer-events-auto">
+        {(["score", "water", "carbon"] as const).map((l) => (
+          <button
+            key={l}
+            onClick={(e) => {
+              e.stopPropagation();
+              setLayer(l);
+            }}
+            className={`rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase transition ${
+              layer === l
+                ? "bg-gradient-to-r from-aqua-500 to-mint-500 text-abyss-950 shadow-sm shadow-aqua-500/10"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            {l === "score" ? "Score" : l === "water" ? "Water" : "Carbon"}
+          </button>
+        ))}
+      </div>
+
       {active && (
         <div className="absolute bottom-4 left-4 right-4 glass-strong rounded-xl p-5 md:left-auto md:w-80">
           <div className="flex items-start justify-between gap-2">
@@ -350,26 +385,26 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
               </div>
             </div>
             <div
-              className="rounded-lg px-2 py-1 font-display text-lg font-bold text-abyss-950"
-              style={{ backgroundColor: scoreColor(active.score) }}
+              className="rounded-lg px-2 py-1 font-display text-lg font-bold text-abyss-950 shadow-md"
+              style={{ backgroundColor: getDotColor(active, layer) }}
             >
-              {active.score}
+              {layer === "water" ? (active.water_stress === 0 ? "Low" : active.water_stress.toFixed(1)) : layer === "carbon" ? active.carbon.toFixed(2) : active.score.toFixed(0)}
             </div>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-            <div className="rounded-lg bg-white/5 p-2">
+            <div className={`rounded-lg p-2 transition ${layer === "carbon" ? "bg-amber-500/20 border border-amber-500/35" : "bg-white/5"}`}>
               <div className="text-slate-500">Carbon</div>
-              <div className="font-mono font-bold text-white">{active.carbon}</div>
+              <div className="font-mono font-bold text-white mt-0.5">{active.carbon}</div>
             </div>
-            <div className="rounded-lg bg-white/5 p-2">
+            <div className={`rounded-lg p-2 transition ${layer === "water" ? "bg-cyan-500/20 border border-cyan-500/35" : "bg-white/5"}`}>
               <div className="text-slate-500">Water</div>
-              <div className="font-mono font-bold text-white text-[10px] leading-tight">
-                {active.water_stress === 0 ? "Low water stress" : `${active.water_stress.toFixed(2)}/5`}
+              <div className="font-mono font-bold text-white text-[10px] leading-tight mt-0.5">
+                {active.water_stress === 0 ? "Low" : `${active.water_stress.toFixed(2)}/5`}
               </div>
             </div>
-            <div className="rounded-lg bg-white/5 p-2">
-              <div className="text-slate-500">Country</div>
-              <div className="truncate font-medium text-white">{active.country}</div>
+            <div className={`rounded-lg p-2 transition ${layer === "score" ? "bg-mint-500/20 border border-mint-500/35" : "bg-white/5"}`}>
+              <div className="text-slate-500">Rating</div>
+              <div className="font-mono font-bold text-white mt-0.5">{active.score.toFixed(0)}</div>
             </div>
           </div>
         </div>
