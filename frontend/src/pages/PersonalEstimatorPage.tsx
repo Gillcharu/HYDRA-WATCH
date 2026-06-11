@@ -483,11 +483,31 @@ export function PersonalEstimatorPage() {
               {/* Disclaimer and Reason */}
               <div className="mt-8">
                 <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-slate-400">
-                  <strong className="text-amber-300">Disclaimer:</strong> The actual data center location is not user-controlled. AI vendors dynamically route individual queries across a global grid of clusters to balance traffic loads and server availability.
+                  <strong className="text-amber-300">Disclaimer:</strong> This is a modeled estimate based on public research and infrastructure assumptions. Actual usage varies by model, routing, data center, cooling system, grid mix, and response length.
                 </div>
 
                 <div className="mt-4 text-xs text-slate-500 leading-relaxed">
-                  <strong>How we estimate:</strong> Query calculations scale with model parameter size, response length, hardware PUE (typically 1.15), water use efficiency (WUE) of region data centers, and local power grid sources. Since exact operational details of commercial models are proprietary, values are represented as a range.
+                  <strong>How we estimate:</strong> Query-level estimates are research-based modeled ranges, not audited measurements. The calculation uses published data-center efficiency metrics such as PUE and WUE, public grid carbon-intensity data, estimated model compute demand, response length, and regional cooling assumptions. Exact values for commercial systems like ChatGPT are not publicly verifiable because model routing, hardware utilization, batching, data-center location, and cooling systems are proprietary. Query calculations scale with model parameter size, response length, hardware PUE, often around 1.1–1.3 for efficient hyperscale data centers, but higher in less efficient facilities, water use efficiency (WUE) of region data centers, and local power grid sources.
+                </div>
+
+                <div className="mt-4 border-t border-white/5 pt-4 text-xs text-slate-500">
+                  <span className="font-semibold text-slate-400 block mb-1">Citations &amp; Reference Sources:</span>
+                  <ul className="list-disc list-inside space-y-1 text-[11px]">
+                    <li>
+                      <a href="https://arxiv.org/abs/2304.03271" target="_blank" rel="noreferrer" className="hover:text-aqua-400 underline">
+                        Making AI Less &ldquo;Thirsty&rdquo;: Islam et al.
+                      </a>
+                    </li>
+                    <li>
+                      <span className="text-slate-400 font-medium">The Green Grid:</span> Water Usage Effectiveness (WUE) &amp; PUE metric backgrounds
+                    </li>
+                    <li>
+                      <span className="text-slate-400 font-medium">IEA / US eGRID:</span> Grid carbon intensity data
+                    </li>
+                    <li>
+                      <span className="text-slate-400 font-medium">Environmental load balancing</span> for distributed AI inference scheduling
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
