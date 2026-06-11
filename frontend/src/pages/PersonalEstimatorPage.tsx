@@ -5,51 +5,20 @@ import { FadeIn } from "../components/AnimatedCounter";
 import { api } from "../lib/api";
 import type { Region } from "../types";
 
-// User location coordinates mapped from GLOBAL_USER_LOCATIONS
+// User location coordinates mapped from GLOBAL_USER_LOCATIONS fallback list
 const USER_COORDS: Record<string, [number, number]> = {
   "Mumbai, India": [19.08, 72.88],
   "Delhi, India": [28.61, 77.21],
-  "Bangalore, India": [12.97, 77.59],
   "Singapore": [1.35, 103.82],
   "Tokyo, Japan": [35.68, 139.69],
-  "Seoul, South Korea": [37.57, 126.98],
   "Sydney, Australia": [-33.87, 151.21],
-  "Melbourne, Australia": [-37.81, 144.96],
-  "Jakarta, Indonesia": [-6.21, 106.85],
-  "Hong Kong": [22.32, 114.17],
-  "Shanghai, China": [31.23, 121.47],
-  "Beijing, China": [39.90, 116.41],
-  "Taipei, Taiwan": [25.03, 121.57],
-  "Bangkok, Thailand": [13.76, 100.50],
-  "Dubai, UAE": [25.20, 55.27],
   "London, UK": [51.51, -0.13],
   "Frankfurt, Germany": [50.11, 8.68],
-  "Amsterdam, Netherlands": [52.37, 4.90],
   "Paris, France": [48.86, 2.35],
   "Stockholm, Sweden": [59.33, 18.07],
-  "Oslo, Norway": [59.91, 10.75],
-  "Helsinki, Finland": [60.17, 24.94],
-  "Dublin, Ireland": [53.35, -6.26],
-  "Zurich, Switzerland": [47.37, 8.54],
-  "Madrid, Spain": [40.42, -3.70],
-  "Milan, Italy": [45.46, 9.19],
-  "Warsaw, Poland": [52.23, 21.01],
   "New York, USA": [40.71, -74.01],
   "Virginia, USA": [39.04, -77.49],
-  "California, USA": [37.34, -121.89],
-  "Oregon, USA": [45.84, -119.70],
-  "Texas, USA": [31.97, -99.90],
-  "Chicago, USA": [41.88, -87.63],
-  "São Paulo, Brazil": [-23.55, -46.63],
-  "Toronto, Canada": [43.65, -79.38],
-  "Montreal, Canada": [45.50, -73.57],
-  "Mexico City, Mexico": [19.43, -99.13],
-  "Cape Town, South Africa": [-33.92, 18.42],
-  "Johannesburg, South Africa": [-26.20, 28.04],
-  "Lagos, Nigeria": [6.52, 3.38],
-  "Nairobi, Kenya": [-1.29, 36.82],
-  "Tel Aviv, Israel": [32.09, 34.78],
-  "Riyadh, Saudi Arabia": [24.71, 46.67]
+  "California, USA": [37.34, -121.89]
 };
 
 // Cloud region coordinates mapping (using REGION_COORDS from geo.py)
@@ -104,31 +73,98 @@ function Tooltip({ text }: { text: string }) {
 }
 
 export function PersonalEstimatorPage() {
-  const [locations, setLocations] = useState<string[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Mode and form states (synced from URL search parameters if available)
+  // Mode and form states
   const [compareMode, setCompareMode] = useState(() => searchParams.get("compare") === "true");
 
   // Config A States
   const [aiTool, setAiTool] = useState(() => searchParams.get("tool") || "ChatGPT");
   const [usage, setUsage] = useState(() => Number(searchParams.get("usage")) || 10);
   const [promptType, setPromptType] = useState(() => searchParams.get("type") || "simple");
-  const [selectedLocation, setSelectedLocation] = useState(() => searchParams.get("loc") || "");
+  const [locationCoords, setLocationCoords] = useState<{ lat: number; lon: number; name: string } | null>(() => {
+    const name = searchParams.get("loc");
+    const lat = searchParams.get("lat");
+    const lon = searchParams.get("lon");
+    if (name && lat && lon) {
+      return { name, lat: Number(lat), lon: Number(lon) };
+    }
+    return null;
+  });
 
   // Config B States (Comparison mode)
   const [aiToolB, setAiToolB] = useState(() => searchParams.get("toolB") || "Gemini");
   const [usageB, setUsageB] = useState(() => Number(searchParams.get("usageB")) || 10);
   const [promptTypeB, setPromptTypeB] = useState(() => searchParams.get("typeB") || "simple");
-  const [selectedLocationB, setSelectedLocationB] = useState(() => searchParams.get("locB") || "");
+  const [locationCoordsB, setLocationCoordsB] = useState<{ lat: number; lon: number; name: string } | null>(() => {
+    const name = searchParams.get("locB");
+    const lat = searchParams.get("latB");
+    const lon = searchParams.get("lonB");
+    if (name && lat && lon) {
+      return { name, lat: Number(lat), lon: Number(lon) };
+    }
+    return null;
+  });
+
+  // Autocomplete search inputs and suggestions state
+  const [locQueryA, setLocQueryA] = useState("");
+  const [suggestionsA, setSuggestionsA] = useState<any[]>([]);
+  const [loadingLocA, setLoadingLocA] = useState(false);
+
+  const [locQueryB, setLocQueryB] = useState("");
+  const [suggestionsB, setSuggestionsB] = useState<any[]>([]);
+  const [loadingLocB, setLoadingLocB] = useState(false);
 
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    api.locations().then((d) => setLocations(d.locations)).catch(console.error);
     api.regions().then((d) => setRegions(d.regions)).catch(console.error);
   }, []);
+
+  // Debounce Location A OSM Nominatim Search
+  useEffect(() => {
+    if (locQueryA.trim().length < 3) {
+      setSuggestionsA([]);
+      return;
+    }
+    const delayDebounce = setTimeout(() => {
+      setLoadingLocA(true);
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locQueryA)}&limit=5`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setSuggestionsA(data);
+          }
+        })
+        .catch(console.error)
+        .finally(() => setLoadingLocA(false));
+    }, 450);
+
+    return () => clearTimeout(delayDebounce);
+  }, [locQueryA]);
+
+  // Debounce Location B OSM Nominatim Search
+  useEffect(() => {
+    if (locQueryB.trim().length < 3) {
+      setSuggestionsB([]);
+      return;
+    }
+    const delayDebounce = setTimeout(() => {
+      setLoadingLocB(true);
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locQueryB)}&limit=5`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setSuggestionsB(data);
+          }
+        })
+        .catch(console.error)
+        .finally(() => setLoadingLocB(false));
+    }, 450);
+
+    return () => clearTimeout(delayDebounce);
+  }, [locQueryB]);
 
   // Sync state changes to search parameters
   useEffect(() => {
@@ -137,13 +173,21 @@ export function PersonalEstimatorPage() {
       tool: aiTool,
       usage: usage.toString(),
       type: promptType,
-      loc: selectedLocation,
     };
+    if (locationCoords) {
+      params.loc = locationCoords.name;
+      params.lat = locationCoords.lat.toString();
+      params.lon = locationCoords.lon.toString();
+    }
     if (compareMode) {
       params.toolB = aiToolB;
       params.usageB = usageB.toString();
       params.typeB = promptTypeB;
-      params.locB = selectedLocationB;
+      if (locationCoordsB) {
+        params.locB = locationCoordsB.name;
+        params.latB = locationCoordsB.lat.toString();
+        params.lonB = locationCoordsB.lon.toString();
+      }
     }
     setSearchParams(params, { replace: true });
   }, [
@@ -151,11 +195,11 @@ export function PersonalEstimatorPage() {
     aiTool,
     usage,
     promptType,
-    selectedLocation,
+    locationCoords,
     aiToolB,
     usageB,
     promptTypeB,
-    selectedLocationB,
+    locationCoordsB,
     setSearchParams,
   ]);
 
@@ -165,9 +209,9 @@ export function PersonalEstimatorPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Helper to resolve region parameters based on user location
-  const getActiveParams = (location: string) => {
-    if (!location || regions.length === 0) {
+  // Helper to resolve region parameters based on geocoded user location coordinates
+  const getActiveParams = (coordsObj: { lat: number; lon: number; name: string } | null) => {
+    if (!coordsObj || regions.length === 0) {
       return {
         carbonIntensityMin: 0.30,
         carbonIntensityMax: 0.55,
@@ -178,19 +222,7 @@ export function PersonalEstimatorPage() {
       };
     }
 
-    const userLocCoords = USER_COORDS[location];
-    if (!userLocCoords) {
-      return {
-        carbonIntensityMin: 0.30,
-        carbonIntensityMax: 0.55,
-        waterStress: 2.5,
-        regionName: "Global Average Grid",
-        wueMin: 0.4,
-        wueMax: 1.2,
-      };
-    }
-
-    const [uLat, uLon] = userLocCoords;
+    const { lat, lon } = coordsObj;
     let closestRegion: Region | null = null;
     let minDistance = Infinity;
 
@@ -198,7 +230,7 @@ export function PersonalEstimatorPage() {
       const coords = REGION_COORDS[r.region_code];
       if (coords) {
         const [rLat, rLon] = coords;
-        const dist = haversineDistance(uLat, uLon, rLat, rLon);
+        const dist = haversineDistance(lat, lon, rLat, rLon);
         if (dist < minDistance) {
           minDistance = dist;
           closestRegion = r;
@@ -231,8 +263,8 @@ export function PersonalEstimatorPage() {
     };
   };
 
-  const activeParamsA = useMemo(() => getActiveParams(selectedLocation), [selectedLocation, regions]);
-  const activeParamsB = useMemo(() => getActiveParams(selectedLocationB), [selectedLocationB, regions]);
+  const activeParamsA = useMemo(() => getActiveParams(locationCoords), [locationCoords, regions]);
+  const activeParamsB = useMemo(() => getActiveParams(locationCoordsB), [locationCoordsB, regions]);
 
   // Main calculation engine
   const calculateFootprint = (
@@ -240,7 +272,7 @@ export function PersonalEstimatorPage() {
     type: string,
     promptsPerDay: number,
     locParams: ReturnType<typeof getActiveParams>,
-    locationString: string
+    coordsObj: { lat: number; lon: number; name: string } | null
   ) => {
     const baseEnergy: Record<string, { min: number; max: number }> = {
       simple: { min: 0.3, max: 1.2 },
@@ -291,7 +323,7 @@ export function PersonalEstimatorPage() {
     const monthlyMultiplier = promptsPerDay * 30;
 
     let confidence = "Medium";
-    if (locationString) {
+    if (coordsObj) {
       confidence = locParams.waterStress > 0 ? "Medium-High" : "Medium";
     } else {
       confidence = "Low-Medium";
@@ -315,24 +347,21 @@ export function PersonalEstimatorPage() {
   };
 
   const estimatesA = useMemo(() => {
-    return calculateFootprint(aiTool, promptType, usage, activeParamsA, selectedLocation);
-  }, [aiTool, promptType, usage, activeParamsA, selectedLocation]);
+    return calculateFootprint(aiTool, promptType, usage, activeParamsA, locationCoords);
+  }, [aiTool, promptType, usage, activeParamsA, locationCoords]);
 
   const estimatesB = useMemo(() => {
-    return calculateFootprint(aiToolB, promptTypeB, usageB, activeParamsB, selectedLocationB);
-  }, [aiToolB, promptTypeB, usageB, activeParamsB, selectedLocationB]);
+    return calculateFootprint(aiToolB, promptTypeB, usageB, activeParamsB, locationCoordsB);
+  }, [aiToolB, promptTypeB, usageB, activeParamsB, locationCoordsB]);
 
   // Tangible environmental equivalency helper
   const getEquivalencies = (energy: number, carbon: number, water: number) => {
-    // Energy: running a 9W LED bulb (Wh / 9Wh = hours). Convert to minutes if < 1 hour.
     const bulbHrs = energy / 9;
     const bulbDisplay = bulbHrs >= 1 ? `${bulbHrs.toFixed(1)} hrs` : `${(bulbHrs * 60).toFixed(0)} mins`;
 
-    // Carbon: standard gasoline car has ~120g CO2 per km. Carbon (g) / 120 = km. Multiply by 1000 for meters.
     const carMeters = (carbon / 120) * 1000;
     const carDisplay = carMeters >= 1000 ? `${(carMeters / 1000).toFixed(2)} km` : `${carMeters.toFixed(0)} meters`;
 
-    // Water: average faucet flows at 6 liters per minute = 0.1 liters per second. Water (L) / 0.1 = seconds.
     const tapSecs = water / 0.1;
     const tapDisplay = tapSecs >= 60 ? `${(tapSecs / 60).toFixed(1)} mins` : `${tapSecs.toFixed(1)} secs`;
 
@@ -482,25 +511,64 @@ export function PersonalEstimatorPage() {
                 </div>
               </div>
 
-              {/* Location */}
-              <div className="mb-6">
-                <label className="label-dark flex items-center" htmlFor="location-select-a">
+              {/* Location Search Input */}
+              <div className="mb-6 relative">
+                <label className="label-dark flex items-center" htmlFor="location-search-a">
                   Your Location (Optional)
-                  <Tooltip text="Used to compute geographical network routing distance and map your request to the nearest cloud data center's grid carbon factor and water watershed stress." />
+                  <Tooltip text="Type any city or country in the world. We dynamically resolve it using geocoding to find the closest cloud datacenter region and its local watershed stress/grid carbon factors." />
                 </label>
-                <select
-                  id="location-select-a"
-                  value={selectedLocation}
-                  onChange={(e) => setSelectedLocation(e.target.value)}
-                  className="input-dark pr-10"
-                >
-                  <option value="">Global Average Grid...</option>
-                  {locations.map((loc) => (
-                    <option key={loc} value={loc}>
-                      {loc}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <input
+                    id="location-search-a"
+                    type="text"
+                    placeholder={locationCoords ? locationCoords.name : "Search any city or country (e.g. Paris, Tokyo)..."}
+                    value={locQueryA}
+                    onChange={(e) => setLocQueryA(e.target.value)}
+                    className="input-dark pr-10"
+                  />
+                  {loadingLocA && (
+                    <div className="absolute right-3 top-3 h-4 w-4 animate-spin rounded-full border-2 border-aqua-400 border-t-transparent" />
+                  )}
+                  {locationCoords && !locQueryA && (
+                    <button
+                      onClick={() => {
+                        setLocationCoords(null);
+                        setLocQueryA("");
+                      }}
+                      className="absolute right-3 top-2.5 text-xs text-slate-500 hover:text-white"
+                      title="Clear location"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                {/* Suggestions Dropdown */}
+                {suggestionsA.length > 0 && (
+                  <div className="absolute left-0 right-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-xl border border-white/10 bg-abyss-950/95 shadow-xl backdrop-blur-xl">
+                    {suggestionsA.map((item) => (
+                      <button
+                        key={item.place_id}
+                        onClick={() => {
+                          setLocationCoords({
+                            lat: parseFloat(item.lat),
+                            lon: parseFloat(item.lon),
+                            name: item.display_name.split(",").slice(0, 3).join(","),
+                          });
+                          setLocQueryA("");
+                          setSuggestionsA([]);
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-xs text-slate-300 hover:bg-white/5 hover:text-white transition-colors border-b border-white/5 last:border-0"
+                      >
+                        {item.display_name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {locationCoords && (
+                  <div className="mt-2 text-[10px] text-aqua-400 font-mono flex items-center gap-1.5">
+                    <span>📍 Mapped: {locationCoords.name} ({locationCoords.lat.toFixed(2)}, {locationCoords.lon.toFixed(2)})</span>
+                  </div>
+                )}
               </div>
 
               {/* Usage Frequency */}
@@ -595,25 +663,64 @@ export function PersonalEstimatorPage() {
                     </div>
                   </div>
 
-                  {/* Location */}
-                  <div className="mb-6">
-                    <label className="label-dark flex items-center" htmlFor="location-select-b">
+                  {/* Location Search Input */}
+                  <div className="mb-6 relative">
+                    <label className="label-dark flex items-center" htmlFor="location-search-b">
                       Your Location (Optional)
-                      <Tooltip text="Used to compute geographical network routing distance and map your request to the nearest cloud data center's grid carbon factor and water watershed stress." />
+                      <Tooltip text="Type any city or country in the world. We dynamically resolve it using geocoding to find the closest cloud datacenter region and its local watershed stress/grid carbon factors." />
                     </label>
-                    <select
-                      id="location-select-b"
-                      value={selectedLocationB}
-                      onChange={(e) => setSelectedLocationB(e.target.value)}
-                      className="input-dark pr-10"
-                    >
-                      <option value="">Global Average Grid...</option>
-                      {locations.map((loc) => (
-                        <option key={loc} value={loc}>
-                          {loc}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <input
+                        id="location-search-b"
+                        type="text"
+                        placeholder={locationCoordsB ? locationCoordsB.name : "Search any city or country (e.g. Paris, Tokyo)..."}
+                        value={locQueryB}
+                        onChange={(e) => setLocQueryB(e.target.value)}
+                        className="input-dark pr-10"
+                      />
+                      {loadingLocB && (
+                        <div className="absolute right-3 top-3 h-4 w-4 animate-spin rounded-full border-2 border-purple-400 border-t-transparent" />
+                      )}
+                      {locationCoordsB && !locQueryB && (
+                        <button
+                          onClick={() => {
+                            setLocationCoordsB(null);
+                            setLocQueryB("");
+                          }}
+                          className="absolute right-3 top-2.5 text-xs text-slate-500 hover:text-white"
+                          title="Clear location"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                    {/* Suggestions Dropdown */}
+                    {suggestionsB.length > 0 && (
+                      <div className="absolute left-0 right-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-xl border border-white/10 bg-abyss-950/95 shadow-xl backdrop-blur-xl">
+                        {suggestionsB.map((item) => (
+                          <button
+                            key={item.place_id}
+                            onClick={() => {
+                              setLocationCoordsB({
+                                lat: parseFloat(item.lat),
+                                lon: parseFloat(item.lon),
+                                name: item.display_name.split(",").slice(0, 3).join(","),
+                              });
+                              setLocQueryB("");
+                              setSuggestionsB([]);
+                            }}
+                            className="w-full px-4 py-2.5 text-left text-xs text-slate-300 hover:bg-white/5 hover:text-white transition-colors border-b border-white/5 last:border-0"
+                          >
+                            {item.display_name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {locationCoordsB && (
+                      <div className="mt-2 text-[10px] text-purple-400 font-mono flex items-center gap-1.5">
+                        <span>📍 Mapped: {locationCoordsB.name} ({locationCoordsB.lat.toFixed(2)}, {locationCoordsB.lon.toFixed(2)})</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Usage Frequency */}
