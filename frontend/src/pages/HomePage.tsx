@@ -118,6 +118,31 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Estimator Promotion Section */}
+      <section className="px-4 pb-12 sm:px-6">
+        <div className="mx-auto max-w-7xl">
+          <FadeIn>
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-abyss-900 to-white/[0.01] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="absolute right-0 top-0 h-40 w-40 bg-aqua-500/10 blur-3xl" />
+              <div>
+                <span className="rounded-full bg-aqua-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-aqua-400">
+                  For Individuals
+                </span>
+                <h2 className="mt-3 font-display text-2xl font-bold text-white">
+                  Estimate the footprint of one AI search
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm text-slate-400">
+                  Curious about the environmental impact of your daily AI assistants? Estimate the water, energy, and carbon consumed by a single query across ChatGPT, Gemini, Claude, or Copilot.
+                </p>
+              </div>
+              <Link to="/personal-estimator" className="btn-glow shrink-0">
+                Check one AI query →
+              </Link>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
       {/* Pipeline */}
       <section className="border-y border-white/5 bg-white/[0.02] px-4 py-12 sm:px-6">
         <div className="mx-auto max-w-7xl">

@@ -5,6 +5,7 @@ import { PlatformPage } from "./pages/PlatformPage";
 import { RegionsPage } from "./pages/RegionsPage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { TrustPage } from "./pages/TrustPage";
+import { PersonalEstimatorPage } from "./pages/PersonalEstimatorPage";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/regions" element={<RegionsPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/trust" element={<TrustPage />} />
+          <Route path="/personal-estimator" element={<PersonalEstimatorPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

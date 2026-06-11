@@ -8,6 +8,7 @@ const NAV = [
   { to: "/regions", label: "Regions" },
   { to: "/leaderboard", label: "Rankings" },
   { to: "/trust", label: "Trust" },
+  { to: "/personal-estimator", label: "Estimator" },
 ];
 
 export function Layout() {
