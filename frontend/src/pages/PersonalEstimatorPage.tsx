@@ -92,6 +92,17 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 }
 
+function Tooltip({ text }: { text: string }) {
+  return (
+    <span className="group relative ml-1.5 inline-flex cursor-help items-center justify-center rounded-full bg-white/10 h-3.5 w-3.5 text-[9px] font-bold text-slate-400 hover:bg-white/20 hover:text-white">
+      ?
+      <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 rounded-lg border border-white/10 bg-abyss-950 p-2 text-[10px] font-normal leading-normal text-slate-300 opacity-0 shadow-xl backdrop-blur-xl transition duration-200 group-hover:opacity-100">
+        {text}
+      </span>
+    </span>
+  );
+}
+
 export function PersonalEstimatorPage() {
   const [locations, setLocations] = useState<string[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
@@ -421,7 +432,10 @@ export function PersonalEstimatorPage() {
 
               {/* AI Tool */}
               <div className="mb-6">
-                <label className="label-dark">AI Assistant Tool</label>
+                <label className="label-dark flex items-center">
+                  AI Assistant Tool
+                  <Tooltip text="Select the specific conversational AI model or assistant to estimate its query parameters." />
+                </label>
                 <div className="grid grid-cols-2 gap-2">
                   {["ChatGPT", "Gemini", "Claude", "Copilot"].map((tool) => (
                     <button
@@ -441,7 +455,10 @@ export function PersonalEstimatorPage() {
 
               {/* Prompt Type */}
               <div className="mb-6">
-                <label className="label-dark">Query / Task Type</label>
+                <label className="label-dark flex items-center">
+                  Query / Task Type
+                  <Tooltip text="Compute varies by workload: simple searches use fewer parameters, while coding and image diffusion models require significantly higher floating-point operations (FLOPs)." />
+                </label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { id: "simple", label: "Simple Search", desc: "Short lookup / chat" },
@@ -467,7 +484,10 @@ export function PersonalEstimatorPage() {
 
               {/* Location */}
               <div className="mb-6">
-                <label className="label-dark" htmlFor="location-select-a">Your Location (Optional)</label>
+                <label className="label-dark flex items-center" htmlFor="location-select-a">
+                  Your Location (Optional)
+                  <Tooltip text="Used to compute geographical network routing distance and map your request to the nearest cloud data center's grid carbon factor and water watershed stress." />
+                </label>
                 <select
                   id="location-select-a"
                   value={selectedLocation}
@@ -486,7 +506,10 @@ export function PersonalEstimatorPage() {
               {/* Usage Frequency */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="label-dark !mb-0" htmlFor="prompts-slider-a">Daily AI Prompts</label>
+                  <label className="label-dark !mb-0 flex items-center" htmlFor="prompts-slider-a">
+                    Daily AI Prompts
+                    <Tooltip text="Adjust the slider to scale your daily prompt queries to a cumulative monthly footprint." />
+                  </label>
                   <span className="font-mono text-xs font-bold text-mint-400">
                     {usage} prompts / day
                   </span>
@@ -522,7 +545,10 @@ export function PersonalEstimatorPage() {
 
                   {/* AI Tool */}
                   <div className="mb-6">
-                    <label className="label-dark">AI Assistant Tool</label>
+                    <label className="label-dark flex items-center">
+                      AI Assistant Tool
+                      <Tooltip text="Select the specific conversational AI model or assistant to estimate its query parameters." />
+                    </label>
                     <div className="grid grid-cols-2 gap-2">
                       {["ChatGPT", "Gemini", "Claude", "Copilot"].map((tool) => (
                         <button
@@ -542,7 +568,10 @@ export function PersonalEstimatorPage() {
 
                   {/* Prompt Type */}
                   <div className="mb-6">
-                    <label className="label-dark">Query / Task Type</label>
+                    <label className="label-dark flex items-center">
+                      Query / Task Type
+                      <Tooltip text="Compute varies by workload: simple searches use fewer parameters, while coding and image diffusion models require significantly higher floating-point operations (FLOPs)." />
+                    </label>
                     <div className="grid grid-cols-2 gap-2">
                       {[
                         { id: "simple", label: "Simple Search", desc: "Short lookup / chat" },
@@ -568,7 +597,10 @@ export function PersonalEstimatorPage() {
 
                   {/* Location */}
                   <div className="mb-6">
-                    <label className="label-dark" htmlFor="location-select-b">Your Location (Optional)</label>
+                    <label className="label-dark flex items-center" htmlFor="location-select-b">
+                      Your Location (Optional)
+                      <Tooltip text="Used to compute geographical network routing distance and map your request to the nearest cloud data center's grid carbon factor and water watershed stress." />
+                    </label>
                     <select
                       id="location-select-b"
                       value={selectedLocationB}
@@ -587,7 +619,10 @@ export function PersonalEstimatorPage() {
                   {/* Usage Frequency */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="label-dark !mb-0" htmlFor="prompts-slider-b">Daily AI Prompts</label>
+                      <label className="label-dark !mb-0 flex items-center" htmlFor="prompts-slider-b">
+                        Daily AI Prompts
+                        <Tooltip text="Adjust the slider to scale your daily prompt queries to a cumulative monthly footprint." />
+                      </label>
                       <span className="font-mono text-xs font-bold text-purple-400">
                         {usageB} prompts / day
                       </span>
@@ -627,7 +662,10 @@ export function PersonalEstimatorPage() {
                     <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-1">
                       {/* Water */}
                       <div className="rounded-xl border border-white/5 bg-white/5 p-4 flex flex-col justify-between">
-                        <div className="text-xs font-semibold text-cyan-400">Water per query</div>
+                        <div className="text-xs font-semibold text-cyan-400 flex items-center">
+                          Water per query
+                          <Tooltip text="Direct site water used for evaporative cooling plus indirect water consumed at regional power plants during electricity generation." />
+                        </div>
                         <div className="font-display text-lg font-bold text-white mt-1.5">
                           ~{estimatesA.waterMin < 0.1 ? `${(estimatesA.waterMin * 1000).toFixed(0)}` : estimatesA.waterMin.toFixed(2)} to{" "}
                           {estimatesA.waterMax < 0.1 ? `${(estimatesA.waterMax * 1000).toFixed(0)} mL` : `${estimatesA.waterMax.toFixed(2)} L`}
@@ -636,7 +674,10 @@ export function PersonalEstimatorPage() {
 
                       {/* Carbon */}
                       <div className="rounded-xl border border-white/5 bg-white/5 p-4 flex flex-col justify-between">
-                        <div className="text-xs font-semibold text-amber-400">Carbon per query</div>
+                        <div className="text-xs font-semibold text-amber-400 flex items-center">
+                          Carbon per query
+                          <Tooltip text="Equivalent grid carbon emissions (g CO2e) generated from power plant energy grid sources matching the datacenter's location." />
+                        </div>
                         <div className="font-display text-lg font-bold text-white mt-1.5">
                           ~{estimatesA.carbonMin.toFixed(2)} to {estimatesA.carbonMax.toFixed(2)} g CO₂e
                         </div>
@@ -644,7 +685,10 @@ export function PersonalEstimatorPage() {
 
                       {/* Energy */}
                       <div className="rounded-xl border border-white/5 bg-white/5 p-4 flex flex-col justify-between">
-                        <div className="text-xs font-semibold text-mint-400">Energy per query</div>
+                        <div className="text-xs font-semibold text-mint-400 flex items-center">
+                          Energy per query
+                          <Tooltip text="Total electricity (Wh) consumed by the GPU server hardware, including datacenter PUE (overhead cooling/lighting factors)." />
+                        </div>
                         <div className="font-display text-lg font-bold text-white mt-1.5">
                           ~{estimatesA.energyMin.toFixed(2)} to {estimatesA.energyMax.toFixed(2)} Wh
                         </div>
@@ -682,7 +726,10 @@ export function PersonalEstimatorPage() {
                       <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-1">
                         {/* Water */}
                         <div className="rounded-xl border border-white/5 bg-white/5 p-4 flex flex-col justify-between">
-                          <div className="text-xs font-semibold text-cyan-400">Water per query</div>
+                          <div className="text-xs font-semibold text-cyan-400 flex items-center">
+                            Water per query
+                            <Tooltip text="Direct site water used for evaporative cooling plus indirect water consumed at regional power plants during electricity generation." />
+                          </div>
                           <div className="font-display text-lg font-bold text-white mt-1.5">
                             ~{estimatesB.waterMin < 0.1 ? `${(estimatesB.waterMin * 1000).toFixed(0)}` : estimatesB.waterMin.toFixed(2)} to{" "}
                             {estimatesB.waterMax < 0.1 ? `${(estimatesB.waterMax * 1000).toFixed(0)} mL` : `${estimatesB.waterMax.toFixed(2)} L`}
@@ -691,7 +738,10 @@ export function PersonalEstimatorPage() {
 
                         {/* Carbon */}
                         <div className="rounded-xl border border-white/5 bg-white/5 p-4 flex flex-col justify-between">
-                          <div className="text-xs font-semibold text-amber-400">Carbon per query</div>
+                          <div className="text-xs font-semibold text-amber-400 flex items-center">
+                            Carbon per query
+                            <Tooltip text="Equivalent grid carbon emissions (g CO2e) generated from power plant energy grid sources matching the datacenter's location." />
+                          </div>
                           <div className="font-display text-lg font-bold text-white mt-1.5">
                             ~{estimatesB.carbonMin.toFixed(2)} to {estimatesB.carbonMax.toFixed(2)} g CO₂e
                           </div>
@@ -699,7 +749,10 @@ export function PersonalEstimatorPage() {
 
                         {/* Energy */}
                         <div className="rounded-xl border border-white/5 bg-white/5 p-4 flex flex-col justify-between">
-                          <div className="text-xs font-semibold text-mint-400">Energy per query</div>
+                          <div className="text-xs font-semibold text-mint-400 flex items-center">
+                            Energy per query
+                            <Tooltip text="Total electricity (Wh) consumed by the GPU server hardware, including datacenter PUE (overhead cooling/lighting factors)." />
+                          </div>
                           <div className="font-display text-lg font-bold text-white mt-1.5">
                             ~{estimatesB.energyMin.toFixed(2)} to {estimatesB.energyMax.toFixed(2)} Wh
                           </div>
