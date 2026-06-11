@@ -53,7 +53,7 @@ export function Layout() {
               API ↗
             </a>
             <Link to="/platform" className="btn-glow ml-3 !py-2 !text-xs">
-              Launch analysis
+              Open platform
             </Link>
           </nav>
         </div>

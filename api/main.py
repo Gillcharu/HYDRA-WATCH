@@ -9,11 +9,13 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Query, Header, Depends
+from fastapi import FastAPI, HTTPException, Query, Header, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+import time
+import httpx
 
 # Setup structured logging
 class JSONFormatter(logging.Formatter):
@@ -70,6 +72,41 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Simple sliding window rate limit database (client_ip -> list of request timestamps)
+RATE_LIMITS = {}
+RATE_LIMIT_MAX = 100  # maximum requests per client IP per minute
+RATE_LIMIT_WINDOW = 60  # time window in seconds
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # Only rate limit API requests
+    if request.url.path.startswith("/api/"):
+        client_ip = request.client.host if request.client else "unknown"
+        now = time.time()
+        
+        # Get request history for this IP
+        history = RATE_LIMITS.get(client_ip, [])
+        # Filter requests within the window
+        history = [t for t in history if now - t < RATE_LIMIT_WINDOW]
+        
+        if len(history) >= RATE_LIMIT_MAX:
+            logger.warning(f"Rate limit exceeded for client IP: {client_ip} on path: {request.url.path}")
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Too many requests. Rate limit exceeded."},
+            )
+            
+        history.append(now)
+        RATE_LIMITS[client_ip] = history
+
+    response = await call_next(request)
+    return response
+
+
+# Path to geocode cache file
+GEOCODE_CACHE_PATH = ROOT / "data" / "geocode_cache.json"
 
 
 class AnalyzeRequest(BaseModel):
@@ -165,6 +202,49 @@ def pd_isna(v) -> bool:
 @app.get("/api/locations")
 def list_locations():
     return {"count": len(all_location_names()), "locations": all_location_names(), "by_continent": locations_by_continent()}
+
+
+@app.get("/api/geocode")
+async def geocode(q: str = Query(..., min_length=2)):
+    cache = {}
+    if GEOCODE_CACHE_PATH.exists():
+        try:
+            with open(GEOCODE_CACHE_PATH, "r", encoding="utf-8") as f:
+                cache = json.load(f)
+        except Exception as e:
+            logger.error(f"Error reading geocode cache: {e}")
+
+    key = q.strip().casefold()
+    if key in cache:
+        logger.info(f"Geocode cache hit for query: {q}")
+        return cache[key]
+
+    # Cache miss - call OSM Nominatim
+    url = "https://nominatim.openstreetmap.org/search"
+    headers = {"User-Agent": "HydraWatch/3.0.0 (sustainability-tool; contact: contact@hydrawatch.com)"}
+    params = {"format": "json", "q": q, "limit": 5}
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(url, params=params, headers=headers)
+            if response.status_code != 200:
+                logger.error(f"Nominatim status {response.status_code} for query: {q}")
+                raise HTTPException(status_code=502, detail="Failed to fetch geocoding data")
+            data = response.json()
+            
+            # Update cache
+            cache[key] = data
+            with open(GEOCODE_CACHE_PATH, "w", encoding="utf-8") as f:
+                json.dump(cache, f, indent=2, ensure_ascii=False)
+                
+            logger.info(f"Geocode cache write/miss for query: {q}")
+            return data
+    except httpx.RequestError as exc:
+        logger.error(f"HTTP request error geocoding query: {exc}")
+        return []
+    except Exception as e:
+        logger.error(f"Unexpected error during geocoding query: {e}")
+        return []
 
 
 @app.get("/api/clusters")

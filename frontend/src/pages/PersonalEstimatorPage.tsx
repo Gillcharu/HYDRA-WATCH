@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { FadeIn } from "../components/AnimatedCounter";
 import { api } from "../lib/api";
 import type { Region } from "../types";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from "recharts";
 
 // User location coordinates mapped from GLOBAL_USER_LOCATIONS fallback list
 const USER_COORDS: Record<string, [number, number]> = {
@@ -61,6 +62,16 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 }
 
+function formatWaterRange(minLiters: number, maxLiters: number): string {
+  if (maxLiters < 1) {
+    return `~${(minLiters * 1000).toFixed(0)} to ${(maxLiters * 1000).toFixed(0)} mL`;
+  }
+  if (minLiters < 1) {
+    return `~${(minLiters * 1000).toFixed(0)} mL to ${maxLiters.toFixed(2)} L`;
+  }
+  return `~${minLiters.toFixed(2)} to ${maxLiters.toFixed(2)} L`;
+}
+
 function Tooltip({ text }: { text: string }) {
   return (
     <span className="group relative ml-1.5 inline-flex cursor-help items-center justify-center rounded-full bg-white/10 h-3.5 w-3.5 text-[9px] font-bold text-slate-400 hover:bg-white/20 hover:text-white">
@@ -71,6 +82,23 @@ function Tooltip({ text }: { text: string }) {
     </span>
   );
 }
+
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="rounded-xl border border-white/10 bg-abyss-950/95 p-3 text-[10px] font-sans shadow-xl backdrop-blur-xl ring-1 ring-white/5">
+        <p className="font-bold text-white mb-1">{data.name} Footprint</p>
+        <div className="space-y-0.5 font-mono">
+          <p className="text-cyan-400">Config A: {payload[0].value} {data.unit}</p>
+          <p className="text-purple-400">Config B: {payload[1].value} {data.unit}</p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 
 export function PersonalEstimatorPage() {
   const [regions, setRegions] = useState<Region[]>([]);
@@ -130,7 +158,7 @@ export function PersonalEstimatorPage() {
     }
     const delayDebounce = setTimeout(() => {
       setLoadingLocA(true);
-      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locQueryA)}&limit=5`)
+      fetch(`/api/geocode?q=${encodeURIComponent(locQueryA)}`)
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -152,7 +180,7 @@ export function PersonalEstimatorPage() {
     }
     const delayDebounce = setTimeout(() => {
       setLoadingLocB(true);
-      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locQueryB)}&limit=5`)
+      fetch(`/api/geocode?q=${encodeURIComponent(locQueryB)}`)
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -354,6 +382,29 @@ export function PersonalEstimatorPage() {
     return calculateFootprint(aiToolB, promptTypeB, usageB, activeParamsB, locationCoordsB);
   }, [aiToolB, promptTypeB, usageB, activeParamsB, locationCoordsB]);
 
+  const chartData = useMemo(() => {
+    return [
+      {
+        name: "Water",
+        A: Math.round(((estimatesA.waterMin + estimatesA.waterMax) / 2) * 1000),
+        B: Math.round(((estimatesB.waterMin + estimatesB.waterMax) / 2) * 1000),
+        unit: "mL",
+      },
+      {
+        name: "Carbon",
+        A: Number(((estimatesA.carbonMin + estimatesA.carbonMax) / 2).toFixed(1)),
+        B: Number(((estimatesB.carbonMin + estimatesB.carbonMax) / 2).toFixed(1)),
+        unit: "g CO₂e",
+      },
+      {
+        name: "Energy",
+        A: Number(((estimatesA.energyMin + estimatesA.energyMax) / 2).toFixed(1)),
+        B: Number(((estimatesB.energyMin + estimatesB.energyMax) / 2).toFixed(1)),
+        unit: "Wh",
+      },
+    ];
+  }, [estimatesA, estimatesB]);
+
   // Tangible environmental equivalency helper
   const getEquivalencies = (energy: number, carbon: number, water: number) => {
     const bulbHrs = energy / 9;
@@ -407,7 +458,7 @@ export function PersonalEstimatorPage() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-aqua-500/30 bg-aqua-500/10 px-4 py-1.5">
               <span className="font-mono text-xs font-medium text-aqua-300">
-                For Curious Individuals
+                For Individuals
               </span>
             </div>
             <h1 className="headline mt-4">Personal AI Use Estimator</h1>
@@ -426,7 +477,7 @@ export function PersonalEstimatorPage() {
                   : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
               }`}
             >
-              {compareMode ? "✓ Side-by-Side Active" : "⚡ Compare Mode"}
+              {compareMode ? "Side-by-Side Active" : "Compare Mode"}
             </button>
 
             {/* Share link button */}
@@ -438,7 +489,7 @@ export function PersonalEstimatorPage() {
                   : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
               }`}
             >
-              {copied ? "✓ Link Copied!" : "🔗 Share Estimate"}
+              {copied ? "Link Copied!" : "Share Estimate"}
             </button>
           </div>
         </div>
@@ -566,7 +617,7 @@ export function PersonalEstimatorPage() {
                 )}
                 {locationCoords && (
                   <div className="mt-2 text-[10px] text-aqua-400 font-mono flex items-center gap-1.5">
-                    <span>📍 Mapped: {locationCoords.name} ({locationCoords.lat.toFixed(2)}, {locationCoords.lon.toFixed(2)})</span>
+                    <span>Mapped: {locationCoords.name} ({locationCoords.lat.toFixed(2)}, {locationCoords.lon.toFixed(2)})</span>
                   </div>
                 )}
               </div>
@@ -718,7 +769,7 @@ export function PersonalEstimatorPage() {
                     )}
                     {locationCoordsB && (
                       <div className="mt-2 text-[10px] text-purple-400 font-mono flex items-center gap-1.5">
-                        <span>📍 Mapped: {locationCoordsB.name} ({locationCoordsB.lat.toFixed(2)}, {locationCoordsB.lon.toFixed(2)})</span>
+                        <span>Mapped: {locationCoordsB.name} ({locationCoordsB.lat.toFixed(2)}, {locationCoordsB.lon.toFixed(2)})</span>
                       </div>
                     )}
                   </div>
@@ -774,11 +825,7 @@ export function PersonalEstimatorPage() {
                           <Tooltip text="Direct site water used for evaporative cooling plus indirect water consumed at regional power plants during electricity generation." />
                         </div>
                         <div className="font-display text-lg font-bold text-white mt-1.5">
-                          {estimatesA.waterMax < 0.1 ? (
-                            `~${(estimatesA.waterMin * 1000).toFixed(0)} to ${(estimatesA.waterMax * 1000).toFixed(0)} mL`
-                          ) : (
-                            `~${estimatesA.waterMin.toFixed(2)} to ${estimatesA.waterMax.toFixed(2)} L`
-                          )}
+                          {formatWaterRange(estimatesA.waterMin, estimatesA.waterMax)}
                         </div>
                       </div>
 
@@ -812,15 +859,15 @@ export function PersonalEstimatorPage() {
                       </div>
                       <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
                         <div>
-                          <div className="text-slate-500">💡 LED Bulb</div>
+                          <div className="text-slate-500">LED Bulb</div>
                           <div className="font-mono font-bold text-white mt-1">{equivsA.bulbDisplay}</div>
                         </div>
                         <div>
-                          <div className="text-slate-500">🚗 Gas Car</div>
+                          <div className="text-slate-500">Gas Car</div>
                           <div className="font-mono font-bold text-white mt-1">{equivsA.carDisplay}</div>
                         </div>
                         <div>
-                          <div className="text-slate-500">🚰 Tap Flow</div>
+                          <div className="text-slate-500">Tap Flow</div>
                           <div className="font-mono font-bold text-white mt-1">{equivsA.tapDisplay}</div>
                         </div>
                       </div>
@@ -841,11 +888,7 @@ export function PersonalEstimatorPage() {
                             <Tooltip text="Direct site water used for evaporative cooling plus indirect water consumed at regional power plants during electricity generation." />
                           </div>
                           <div className="font-display text-lg font-bold text-white mt-1.5">
-                            {estimatesB.waterMax < 0.1 ? (
-                              `~${(estimatesB.waterMin * 1000).toFixed(0)} to ${(estimatesB.waterMax * 1000).toFixed(0)} mL`
-                            ) : (
-                              `~${estimatesB.waterMin.toFixed(2)} to ${estimatesB.waterMax.toFixed(2)} L`
-                            )}
+                            {formatWaterRange(estimatesB.waterMin, estimatesB.waterMax)}
                           </div>
                         </div>
 
@@ -879,15 +922,15 @@ export function PersonalEstimatorPage() {
                         </div>
                         <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
                           <div>
-                            <div className="text-slate-500">💡 LED Bulb</div>
+                            <div className="text-slate-500">LED Bulb</div>
                             <div className="font-mono font-bold text-white mt-1">{equivsB.bulbDisplay}</div>
                           </div>
                           <div>
-                            <div className="text-slate-500">🚗 Gas Car</div>
+                            <div className="text-slate-500">Gas Car</div>
                             <div className="font-mono font-bold text-white mt-1">{equivsB.carDisplay}</div>
                           </div>
                           <div>
-                            <div className="text-slate-500">🚰 Tap Flow</div>
+                            <div className="text-slate-500">Tap Flow</div>
                             <div className="font-mono font-bold text-white mt-1">{equivsB.tapDisplay}</div>
                           </div>
                         </div>
@@ -900,7 +943,7 @@ export function PersonalEstimatorPage() {
                 {compareMode && comparisonResults && (
                   <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
                     <div className="text-sm font-bold text-white mb-3 flex items-center gap-1">
-                      <span>🆚 Comparison Analysis</span>
+                      <span>Comparison Analysis</span>
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2 text-xs font-semibold">
                       <div className="flex items-center gap-2.5">
@@ -923,6 +966,20 @@ export function PersonalEstimatorPage() {
                           </span>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Visual Comparison Chart */}
+                    <div className="mt-6 h-48 w-full border-t border-white/5 pt-4">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff0d" vertical={false} />
+                          <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} />
+                          <YAxis stroke="#94a3b8" fontSize={9} tickLine={false} />
+                          <RechartsTooltip content={<CustomTooltip />} />
+                          <Bar dataKey="A" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="B" fill="#a855f7" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
                     </div>
                   </div>
                 )}
