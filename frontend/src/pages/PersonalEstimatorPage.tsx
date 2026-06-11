@@ -758,7 +758,7 @@ export function PersonalEstimatorPage() {
                 <h2 className="font-display text-xl font-bold text-white mb-6">Estimated Impact</h2>
 
                 {/* Estimation Values Grid */}
-                <div className={`grid gap-6 ${compareMode ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
+                <div className={compareMode ? "grid gap-6 md:grid-cols-2" : "space-y-6"}>
                   {/* CONFIG A (AND REGULAR MODE) DISPLAY */}
                   <div className={`space-y-4 ${compareMode ? "border-r border-white/5 pr-6" : ""}`}>
                     {compareMode && (
@@ -766,7 +766,7 @@ export function PersonalEstimatorPage() {
                         <span className="h-2 w-2 rounded-full bg-aqua-400" /> Config A ({aiTool})
                       </div>
                     )}
-                    <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-1">
+                    <div className={`grid gap-3 ${compareMode ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-3"}`}>
                       {/* Water */}
                       <div className="rounded-xl border border-white/5 bg-white/5 p-4 flex flex-col justify-between">
                         <div className="text-xs font-semibold text-cyan-400 flex items-center">
@@ -774,8 +774,11 @@ export function PersonalEstimatorPage() {
                           <Tooltip text="Direct site water used for evaporative cooling plus indirect water consumed at regional power plants during electricity generation." />
                         </div>
                         <div className="font-display text-lg font-bold text-white mt-1.5">
-                          ~{estimatesA.waterMin < 0.1 ? `${(estimatesA.waterMin * 1000).toFixed(0)}` : estimatesA.waterMin.toFixed(2)} to{" "}
-                          {estimatesA.waterMax < 0.1 ? `${(estimatesA.waterMax * 1000).toFixed(0)} mL` : `${estimatesA.waterMax.toFixed(2)} L`}
+                          {estimatesA.waterMax < 0.1 ? (
+                            `~${(estimatesA.waterMin * 1000).toFixed(0)} to ${(estimatesA.waterMax * 1000).toFixed(0)} mL`
+                          ) : (
+                            `~${estimatesA.waterMin.toFixed(2)} to ${estimatesA.waterMax.toFixed(2)} L`
+                          )}
                         </div>
                       </div>
 
@@ -830,7 +833,7 @@ export function PersonalEstimatorPage() {
                       <div className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
                         <span className="h-2 w-2 rounded-full bg-purple-400" /> Config B ({aiToolB})
                       </div>
-                      <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-1">
+                      <div className="grid gap-3 grid-cols-1">
                         {/* Water */}
                         <div className="rounded-xl border border-white/5 bg-white/5 p-4 flex flex-col justify-between">
                           <div className="text-xs font-semibold text-cyan-400 flex items-center">
@@ -838,8 +841,11 @@ export function PersonalEstimatorPage() {
                             <Tooltip text="Direct site water used for evaporative cooling plus indirect water consumed at regional power plants during electricity generation." />
                           </div>
                           <div className="font-display text-lg font-bold text-white mt-1.5">
-                            ~{estimatesB.waterMin < 0.1 ? `${(estimatesB.waterMin * 1000).toFixed(0)}` : estimatesB.waterMin.toFixed(2)} to{" "}
-                            {estimatesB.waterMax < 0.1 ? `${(estimatesB.waterMax * 1000).toFixed(0)} mL` : `${estimatesB.waterMax.toFixed(2)} L`}
+                            {estimatesB.waterMax < 0.1 ? (
+                              `~${(estimatesB.waterMin * 1000).toFixed(0)} to ${(estimatesB.waterMax * 1000).toFixed(0)} mL`
+                            ) : (
+                              `~${estimatesB.waterMin.toFixed(2)} to ${estimatesB.waterMax.toFixed(2)} L`
+                            )}
                           </div>
                         </div>
 
