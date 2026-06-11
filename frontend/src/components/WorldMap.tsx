@@ -1,126 +1,393 @@
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MapPoint } from "../types";
 
 function scoreColor(score: number): string {
-  if (score >= 70) return "#14b8a6";
-  if (score >= 50) return "#06b6d4";
-  if (score >= 35) return "#f59e0b";
-  return "#ef4444";
-}
-
-function project(lat: number, lon: number) {
-  return { x: ((lon + 180) / 360) * 100, y: ((82 - lat) / 150) * 100 };
+  if (score >= 70) return "#14b8a6"; // mint/cyan
+  if (score >= 50) return "#06b6d4"; // blue-cyan
+  if (score >= 35) return "#f59e0b"; // amber
+  return "#ef4444"; // red
 }
 
 export function WorldMap({ points }: { points: MapPoint[] }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<MapPoint | null>(null);
-  const plotted = useMemo(
-    () =>
-      points
-        .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon))
-        .map((p) => ({ ...p, ...project(p.lat, p.lon), color: scoreColor(p.score) })),
-    [points],
-  );
 
-  if (!plotted.length) {
-    return (
-      <div className="flex h-[460px] items-center justify-center bg-abyss-900 text-slate-500">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-aqua-500 border-t-transparent" />
-          Loading global region map…
-        </div>
-      </div>
+  // Rotation angles (in radians)
+  const rotationY = useRef(3.5); // spin
+  const rotationX = useRef(0.3); // tilt
+  const isDragging = useRef(false);
+  const dragStart = useRef({ x: 0, y: 0, rY: 0, rX: 0 });
+  const hoveredIndex = useRef<number | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationFrameId: number;
+
+    const resizeCanvas = () => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      canvas.width = rect?.width || 800;
+      canvas.height = 480;
+    };
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    // Set initial active point
+    if (points.length && !active) {
+      const initial = points.find((p) => p.score >= 70) || points[0];
+      setActive(initial);
+    }
+
+    const render = () => {
+      if (!isDragging.current) {
+        // Slow auto-rotation
+        rotationY.current += 0.0015;
+      }
+
+      const width = canvas.width;
+      const height = canvas.height;
+      const cx = width / 2;
+      const cy = height / 2;
+      const R = Math.min(width, height) * 0.38; // Radius relative to viewport
+
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. Draw Globe Sphere Background (3D shading)
+      const radialGrad = ctx.createRadialGradient(
+        cx - R / 4,
+        cy - R / 4,
+        R * 0.1,
+        cx,
+        cy,
+        R
+      );
+      radialGrad.addColorStop(0, "#0b172a"); // Dark slate inner
+      radialGrad.addColorStop(0.7, "#030712"); // Abyss gray
+      radialGrad.addColorStop(1, "#020617"); // Pure dark edge
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+      ctx.fillStyle = radialGrad;
+      ctx.fill();
+
+      // Outer thin glowing boundary
+      ctx.strokeStyle = "rgba(6, 182, 212, 0.15)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      const rY = rotationY.current;
+      const rX = rotationX.current;
+
+      // Project spherical (lat, lon) coordinates to 3D space with rotation
+      const project = (lat: number, lon: number) => {
+        const radLat = (lat * Math.PI) / 180;
+        const radLon = (lon * Math.PI) / 180;
+
+        // Cartesian mapping (z is forward towards viewer)
+        const x = R * Math.cos(radLat) * Math.sin(radLon);
+        const y = -R * Math.sin(radLat);
+        const z = R * Math.cos(radLat) * Math.cos(radLon);
+
+        // Y-axis rotation (spin)
+        const x1 = x * Math.cos(rY) - z * Math.sin(rY);
+        const z1 = x * Math.sin(rY) + z * Math.cos(rY);
+        const y1 = y;
+
+        // X-axis rotation (tilt)
+        const x2 = x1;
+        const y2 = y1 * Math.cos(rX) - z1 * Math.sin(rX);
+        const z2 = y1 * Math.sin(rX) + z1 * Math.cos(rX);
+
+        return { x: cx + x2, y: cy + y2, z: z2 };
+      };
+
+      // 2. Draw Latitudes Grid Lines
+      const latSteps = [-60, -30, 0, 30, 60];
+      latSteps.forEach((lat) => {
+        ctx.beginPath();
+        let first = true;
+        for (let lon = 0; lon <= 360; lon += 5) {
+          const pt = project(lat, lon);
+          if (pt.z > -20) {
+            if (first) {
+              ctx.moveTo(pt.x, pt.y);
+              first = false;
+            } else {
+              ctx.lineTo(pt.x, pt.y);
+            }
+          } else {
+            first = true;
+          }
+        }
+        ctx.strokeStyle = lat === 0 ? "rgba(8, 145, 178, 0.16)" : "rgba(8, 145, 178, 0.05)";
+        ctx.lineWidth = lat === 0 ? 1.5 : 1;
+        ctx.stroke();
+      });
+
+      // 3. Draw Longitudes Grid Lines
+      const lonSteps = [0, 45, 90, 135, 180, 225, 270, 315];
+      lonSteps.forEach((lon) => {
+        ctx.beginPath();
+        let first = true;
+        for (let lat = -80; lat <= 80; lat += 5) {
+          const pt = project(lat, lon);
+          if (pt.z > -20) {
+            if (first) {
+              ctx.moveTo(pt.x, pt.y);
+              first = false;
+            } else {
+              ctx.lineTo(pt.x, pt.y);
+            }
+          } else {
+            first = true;
+          }
+        }
+        ctx.strokeStyle = "rgba(8, 145, 178, 0.05)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+
+      // 4. Project and Draw Region Dots
+      const projectedDots = points.map((p, index) => {
+        return {
+          point: p,
+          index,
+          ...project(p.lat, p.lon),
+        };
+      });
+
+      // Draw back-facing dots (z < 0) first, then front-facing dots (z > 0)
+      projectedDots.sort((a, b) => a.z - b.z);
+
+      projectedDots.forEach((d) => {
+        const color = scoreColor(d.point.score);
+        const isActive = active?.region_code === d.point.region_code;
+        const isHovered = hoveredIndex.current === d.index;
+
+        if (d.z < 0) {
+          // Transparent indicators for regions on the far side
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, 2, 0, 2 * Math.PI);
+          ctx.fillStyle = "rgba(148, 163, 184, 0.15)";
+          ctx.fill();
+        } else {
+          // Front-facing regions
+          ctx.beginPath();
+          const radius = isActive || isHovered ? 6.5 : 4.5;
+          ctx.arc(d.x, d.y, radius, 0, 2 * Math.PI);
+          ctx.fillStyle = color;
+          ctx.fill();
+
+          // Accent ring for active/hovered indicators
+          if (isActive || isHovered) {
+            ctx.beginPath();
+            ctx.arc(d.x, d.y, radius + 4, 0, 2 * Math.PI);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(d.x, d.y, radius + 8, 0, 2 * Math.PI);
+            ctx.strokeStyle = `${color}22`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      });
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [points, active]);
+
+  // Mouse / Touch handlers for dragging
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    isDragging.current = true;
+    dragStart.current = {
+      x: e.clientX,
+      y: e.clientY,
+      rY: rotationY.current,
+      rX: rotationX.current,
+    };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    if (isDragging.current) {
+      const dx = e.clientX - dragStart.current.x;
+      const dy = e.clientY - dragStart.current.y;
+      rotationY.current = dragStart.current.rY + dx * 0.005;
+      rotationX.current = Math.max(
+        -Math.PI / 2.3,
+        Math.min(Math.PI / 2.3, dragStart.current.rX + dy * 0.005)
+      );
+      return;
+    }
+
+    // Hover collision detection
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const cx = width / 2;
+    const cy = height / 2;
+    const R = Math.min(width, height) * 0.38;
+
+    const rY = rotationY.current;
+    const rX = rotationX.current;
+
+    let closestIndex: number | null = null;
+    let minDistance = 12; // Hover detection radius in pixels
+
+    points.forEach((p, index) => {
+      const radLat = (p.lat * Math.PI) / 180;
+      const radLon = (p.lon * Math.PI) / 180;
+
+      const x = R * Math.cos(radLat) * Math.sin(radLon);
+      const y = -R * Math.sin(radLat);
+      const z = R * Math.cos(radLat) * Math.cos(radLon);
+
+      const x1 = x * Math.cos(rY) - z * Math.sin(rY);
+      const z1 = x * Math.sin(rY) + z * Math.cos(rY);
+      const y1 = y;
+
+      const x2 = x1;
+      const y2 = y1 * Math.cos(rX) - z1 * Math.sin(rX);
+      const z2 = y1 * Math.sin(rX) + z1 * Math.cos(rX);
+
+      // Only check front side coordinates
+      if (z2 > 0) {
+        const px = cx + x2;
+        const py = cy + y2;
+        const dist = Math.hypot(mx - px, my - py);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestIndex = index;
+        }
+      }
+    });
+
+    if (closestIndex !== null) {
+      hoveredIndex.current = closestIndex;
+      setActive(points[closestIndex]);
+    } else {
+      hoveredIndex.current = null;
+    }
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+  };
+
+  const handleMouseLeave = () => {
+    isDragging.current = false;
+    hoveredIndex.current = null;
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length !== 1) return;
+    isDragging.current = true;
+    dragStart.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      rY: rotationY.current,
+      rX: rotationX.current,
+    };
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDragging.current || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - dragStart.current.x;
+    const dy = e.touches[0].clientY - dragStart.current.y;
+    rotationY.current = dragStart.current.rY + dx * 0.005;
+    rotationX.current = Math.max(
+      -Math.PI / 2.3,
+      Math.min(Math.PI / 2.3, dragStart.current.rX + dy * 0.005)
     );
-  }
+  };
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-abyss-900 to-abyss-950">
-      <div className="relative h-[480px] w-full">
-        <svg className="absolute inset-0 h-full w-full opacity-30" viewBox="0 0 1000 500" preserveAspectRatio="none" aria-hidden>
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-            </pattern>
-          </defs>
-          <rect width="1000" height="500" fill="url(#grid)" />
-        </svg>
+    <div ref={containerRef} className="relative overflow-hidden bg-gradient-to-b from-abyss-900 to-abyss-950 min-h-[480px]">
+      <canvas
+        ref={canvasRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseUp}
+        className="block cursor-grab active:cursor-grabbing mx-auto"
+      />
 
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 500" preserveAspectRatio="none" aria-hidden>
-          <g fill="#1e3a5f" stroke="#0891b2" strokeWidth="0.8" opacity="0.6">
-            <path d="M135 132 C92 145 72 184 82 229 C94 283 143 309 189 288 C224 272 237 231 223 191 C209 151 176 122 135 132 Z" />
-            <path d="M231 292 C203 315 196 358 217 395 C239 432 276 447 304 425 C331 404 327 359 307 326 C287 292 257 271 231 292 Z" />
-            <path d="M448 126 C404 121 371 141 366 172 C360 204 396 224 441 217 C482 211 508 185 500 155 C493 134 475 129 448 126 Z" />
-            <path d="M500 221 C463 248 452 309 486 344 C518 377 572 357 585 308 C597 260 550 187 500 221 Z" />
-            <path d="M583 112 C536 128 512 171 531 215 C549 259 610 267 660 247 C724 222 762 178 733 139 C704 101 642 92 583 112 Z" />
-            <path d="M708 244 C684 265 688 301 716 318 C748 337 801 321 818 288 C834 256 789 226 751 228 C733 229 718 235 708 244 Z" />
-            <path d="M777 337 C750 353 739 388 761 413 C784 441 835 439 862 414 C891 387 871 348 836 335 C814 326 794 327 777 337 Z" />
-          </g>
-        </svg>
-
-        {plotted.map((p) => (
-          <button
-            key={`${p.provider}-${p.region_code}`}
-            type="button"
-            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/80 shadow-lg transition-all duration-200 hover:z-20 hover:scale-[2] focus:z-20 focus:scale-[2] focus:outline-none"
-            style={{
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              width: active?.region_code === p.region_code ? 14 : 10,
-              height: active?.region_code === p.region_code ? 14 : 10,
-              backgroundColor: p.color,
-              boxShadow: active?.region_code === p.region_code ? `0 0 20px ${p.color}` : undefined,
-            }}
-            onMouseEnter={() => setActive(p)}
-            onFocus={() => setActive(p)}
-            onClick={() => setActive(p)}
-            aria-label={`${p.provider} ${p.region_name} score ${p.score}`}
-          />
-        ))}
-
-        <div className="absolute left-4 top-4 glass rounded-xl px-4 py-3">
-          <div className="font-display text-sm font-bold text-white">{plotted.length} regions</div>
-          <div className="text-xs text-slate-500">7 cloud providers · live scores</div>
-        </div>
-
-        {active && (
-          <div className="absolute bottom-4 left-4 right-4 glass-strong rounded-xl p-5 md:left-auto md:w-80">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <div className="font-display font-bold text-white">{active.region_name}</div>
-                <div className="mt-0.5 font-mono text-[10px] text-aqua-400">{active.provider} · {active.region_code}</div>
-              </div>
-              <div
-                className="rounded-lg px-2 py-1 font-display text-lg font-bold text-abyss-950"
-                style={{ backgroundColor: active.color }}
-              >
-                {active.score}
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-              <div className="rounded-lg bg-white/5 p-2">
-                <div className="text-slate-500">Carbon</div>
-                <div className="font-mono font-bold text-white">{active.carbon}</div>
-              </div>
-              <div className="rounded-lg bg-white/5 p-2">
-                <div className="text-slate-500">Water</div>
-                <div className="font-mono font-bold text-white text-[10px] leading-tight">
-                  {active.water_stress === 0 ? "Low water stress" : `${active.water_stress.toFixed(2)}/5`}
-                </div>
-              </div>
-              <div className="rounded-lg bg-white/5 p-2">
-                <div className="text-slate-500">Country</div>
-                <div className="truncate font-medium text-white">{active.country}</div>
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="absolute left-4 top-4 glass rounded-xl px-4 py-3 pointer-events-none">
+        <div className="font-display text-sm font-bold text-white">{points.length} regions</div>
+        <div className="text-[10px] text-slate-500 font-mono mt-0.5">Drag to spin globe · Hover dots</div>
       </div>
 
+      {active && (
+        <div className="absolute bottom-4 left-4 right-4 glass-strong rounded-xl p-5 md:left-auto md:w-80">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <div className="font-display font-bold text-white">{active.region_name}</div>
+              <div className="mt-0.5 font-mono text-[10px] text-aqua-400">
+                {active.provider} · {active.region_code}
+              </div>
+            </div>
+            <div
+              className="rounded-lg px-2 py-1 font-display text-lg font-bold text-abyss-950"
+              style={{ backgroundColor: scoreColor(active.score) }}
+            >
+              {active.score}
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="rounded-lg bg-white/5 p-2">
+              <div className="text-slate-500">Carbon</div>
+              <div className="font-mono font-bold text-white">{active.carbon}</div>
+            </div>
+            <div className="rounded-lg bg-white/5 p-2">
+              <div className="text-slate-500">Water</div>
+              <div className="font-mono font-bold text-white text-[10px] leading-tight">
+                {active.water_stress === 0 ? "Low water stress" : `${active.water_stress.toFixed(2)}/5`}
+              </div>
+            </div>
+            <div className="rounded-lg bg-white/5 p-2">
+              <div className="text-slate-500">Country</div>
+              <div className="truncate font-medium text-white">{active.country}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap justify-center gap-6 border-t border-white/5 bg-abyss-950/80 px-4 py-3 text-[11px] text-slate-500">
-        <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-mint-500" /> 70+ excellent</span>
-        <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-aqua-500" /> 50–69 good</span>
-        <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-amber-500" /> 35–49 review</span>
-        <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-red-500" /> &lt;35 high risk</span>
+        <span className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-mint-500" /> 70+ excellent
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-aqua-500" /> 50–69 good
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-amber-500" /> 35–49 review
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-red-500" /> &lt;35 high risk
+        </span>
       </div>
     </div>
   );
