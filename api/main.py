@@ -56,12 +56,22 @@ from hydrawatch.global_locations import all_location_names, locations_by_contine
 from hydrawatch.providers import ALL_PROVIDERS, PROVIDER_LABELS  # noqa: E402
 from hydrawatch.scoring import compute_sustainability_score  # noqa: E402
 from hydrawatch.wue_data import get_wue  # noqa: E402
+from sqlalchemy.orm import Session  # noqa: E402
+from hydrawatch.database import init_db, get_db, GeocodeCache, SavedEstimate  # noqa: E402
 
 app = FastAPI(
     title="HydraWatch API",
     description="Sustainability analysis API for AI infrastructure — powers hydrawatch.com",
     version="3.0.0",
 )
+
+@app.on_event("startup")
+def startup_event():
+    logger.info("Initializing database tables...")
+    try:
+        init_db()
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
 
 allowed_origins_str = os.environ.get("CORS_ALLOWED_ORIGINS", "*")
 allowed_origins = [o.strip() for o in allowed_origins_str.split(",") if o.strip()]
@@ -205,46 +215,128 @@ def list_locations():
 
 
 @app.get("/api/geocode")
-async def geocode(q: str = Query(..., min_length=2)):
+async def geocode(q: str = Query(..., min_length=2), db: Session = Depends(get_db)):
+    key = q.strip().casefold()
+    
+    # 1. Check database cache
+    try:
+        cached = db.query(GeocodeCache).filter(GeocodeCache.query == key).first()
+        if cached:
+            logger.info(f"Database geocode cache hit for query: {q}")
+            return [{
+                "place_id": 0,
+                "lat": str(cached.lat),
+                "lon": str(cached.lon),
+                "display_name": cached.display_name
+            }]
+    except Exception as e:
+        logger.error(f"Error checking database geocode cache: {e}")
+
+    # 2. Check legacy file cache
     cache = {}
     if GEOCODE_CACHE_PATH.exists():
         try:
             with open(GEOCODE_CACHE_PATH, "r", encoding="utf-8") as f:
                 cache = json.load(f)
         except Exception as e:
-            logger.error(f"Error reading geocode cache: {e}")
+            logger.error(f"Error reading legacy geocode cache file: {e}")
 
-    key = q.strip().casefold()
     if key in cache:
-        logger.info(f"Geocode cache hit for query: {q}")
+        logger.info(f"Legacy geocode cache hit for query: {q}")
+        # Sync to DB cache so future runs hit DB
+        try:
+            val = cache[key]
+            if isinstance(val, list) and len(val) > 0:
+                first = val[0]
+                existing = db.query(GeocodeCache).filter(GeocodeCache.query == key).first()
+                if not existing:
+                    db.add(GeocodeCache(
+                        query=key,
+                        lat=float(first.get("lat", 0.0)),
+                        lon=float(first.get("lon", 0.0)),
+                        display_name=first.get("display_name", "")
+                    ))
+                    db.commit()
+        except Exception as db_err:
+            logger.error(f"Failed to sync legacy cache to DB: {db_err}")
+            db.rollback()
         return cache[key]
 
-    # Cache miss - call OSM Nominatim
-    url = "https://nominatim.openstreetmap.org/search"
-    headers = {"User-Agent": "HydraWatch/3.0.0 (sustainability-tool; contact: contact@hydrawatch.com)"}
-    params = {"format": "json", "q": q, "limit": 5}
+    # 3. Cache miss - fetch live
+    google_key = os.environ.get("GOOGLE_MAPS_API_KEY")
+    results = []
     
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(url, params=params, headers=headers)
-            if response.status_code != 200:
-                logger.error(f"Nominatim status {response.status_code} for query: {q}")
-                raise HTTPException(status_code=502, detail="Failed to fetch geocoding data")
-            data = response.json()
+    if google_key:
+        logger.info(f"Using Google Maps Geocoding API for query: {q}")
+        url = "https://maps.googleapis.com/maps/api/geocode/json"
+        params = {"address": q, "key": google_key}
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(url, params=params)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get("status") == "OK" and data.get("results"):
+                        for idx, r in enumerate(data["results"]):
+                            lat = r["geometry"]["location"]["lat"]
+                            lon = r["geometry"]["location"]["lng"]
+                            display_name = r["formatted_address"]
+                            place_id = r.get("place_id") or f"g_{idx}"
+                            results.append({
+                                "place_id": place_id,
+                                "lat": str(lat),
+                                "lon": str(lon),
+                                "display_name": display_name
+                            })
+                    else:
+                        logger.warning(f"Google Maps API returned non-OK status: {data.get('status')}")
+                else:
+                    logger.error(f"Google Maps API status {response.status_code} for query: {q}")
+        except Exception as e:
+            logger.error(f"Error calling Google Maps API: {e}")
             
-            # Update cache
-            cache[key] = data
+    if not results:
+        # Fallback to OSM Nominatim
+        logger.info(f"Using OpenStreetMap Nominatim for query: {q}")
+        url = "https://nominatim.openstreetmap.org/search"
+        headers = {"User-Agent": "HydraWatch/3.0.0 (sustainability-tool; contact: contact@hydrawatch.com)"}
+        params = {"format": "json", "q": q, "limit": 5}
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(url, params=params, headers=headers)
+                if response.status_code == 200:
+                    results = response.json()
+                else:
+                    logger.error(f"Nominatim status {response.status_code} for query: {q}")
+        except Exception as e:
+            logger.error(f"Error calling Nominatim API: {e}")
+
+    # Write back to both DB and legacy cache file
+    if results:
+        try:
+            first = results[0]
+            existing = db.query(GeocodeCache).filter(GeocodeCache.query == key).first()
+            if not existing:
+                db.add(GeocodeCache(
+                    query=key,
+                    lat=float(first["lat"]),
+                    lon=float(first["lon"]),
+                    display_name=first["display_name"]
+                ))
+                db.commit()
+                logger.info(f"Saved cache entry to database for query: {q}")
+        except Exception as db_err:
+            logger.error(f"Error saving geocode cache to DB: {db_err}")
+            db.rollback()
+
+        # Update legacy file cache
+        try:
+            cache[key] = results
             with open(GEOCODE_CACHE_PATH, "w", encoding="utf-8") as f:
                 json.dump(cache, f, indent=2, ensure_ascii=False)
-                
-            logger.info(f"Geocode cache write/miss for query: {q}")
-            return data
-    except httpx.RequestError as exc:
-        logger.error(f"HTTP request error geocoding query: {exc}")
-        return []
-    except Exception as e:
-        logger.error(f"Unexpected error during geocoding query: {e}")
-        return []
+        except Exception as file_err:
+            logger.error(f"Error writing geocode cache file: {file_err}")
+
+    return results
 
 
 @app.get("/api/clusters")
@@ -408,6 +500,89 @@ async def deploy_gate_legacy(
 @app.get("/case-study/india-nordic")
 async def case_study_legacy():
     return await case_study()
+
+
+# ── Saved Estimates & Sitemap ──────────────────────────────────────────────────
+
+class SavedEstimateResponse(BaseModel):
+    id: str
+    config_data: dict
+
+@app.post("/api/estimates", response_model=SavedEstimateResponse)
+def create_saved_estimate(payload: dict, db: Session = Depends(get_db)):
+    import uuid
+    est_id = str(uuid.uuid4())
+    db_est = SavedEstimate(id=est_id, config_data=payload)
+    try:
+        db.add(db_est)
+        db.commit()
+        db.refresh(db_est)
+        logger.info(f"Saved estimate with id: {est_id}")
+        return SavedEstimateResponse(id=db_est.id, config_data=db_est.config_data)
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to save estimate: {e}")
+        raise HTTPException(status_code=500, detail="Database write failure")
+
+@app.get("/api/estimates/{estimate_id}", response_model=SavedEstimateResponse)
+def get_saved_estimate(estimate_id: str, db: Session = Depends(get_db)):
+    try:
+        db_est = db.query(SavedEstimate).filter(SavedEstimate.id == estimate_id).first()
+        if not db_est:
+            raise HTTPException(status_code=404, detail="Saved estimate not found")
+        return SavedEstimateResponse(id=db_est.id, config_data=db_est.config_data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving saved estimate: {e}")
+        raise HTTPException(status_code=500, detail="Database read failure")
+
+from fastapi.responses import Response
+
+@app.get("/sitemap.xml")
+def sitemap(request: Request, db: Session = Depends(get_db)):
+    base_url = str(request.base_url).rstrip("/")
+    static_routes = [
+        "",
+        "/platform",
+        "/regions",
+        "/leaderboard",
+        "/trust",
+        "/personal-estimator"
+    ]
+    
+    xml_entries = []
+    for route in static_routes:
+        url = f"{base_url}{route}"
+        xml_entries.append(
+            f"  <url>\n"
+            f"    <loc>{url}</loc>\n"
+            f"    <changefreq>weekly</changefreq>\n"
+            f"    <priority>0.8</priority>\n"
+            f"  </url>"
+        )
+        
+    try:
+        estimates = db.query(SavedEstimate).order_by(SavedEstimate.created_at.desc()).limit(200).all()
+        for est in estimates:
+            url = f"{base_url}/e/{est.id}"
+            xml_entries.append(
+                f"  <url>\n"
+                f"    <loc>{url}</loc>\n"
+                f"    <changefreq>monthly</changefreq>\n"
+                f"    <priority>0.6</priority>\n"
+                f"  </url>"
+            )
+    except Exception as e:
+        logger.error(f"Error querying saved estimates for sitemap: {e}")
+
+    xml_content = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "\n".join(xml_entries)
+        + "\n</urlset>"
+    )
+    return Response(content=xml_content, media_type="application/xml")
 
 
 # ── Production SPA ─────────────────────────────────────────────────────────────

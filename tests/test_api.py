@@ -74,3 +74,46 @@ def test_api_exporters():
     assert r.status_code == 200
     assert "tf" in r.json()
     assert "aws" in r.json()["tf"]
+
+
+def test_api_geocode_and_estimates():
+    # Test geocode caching
+    r = client.get("/api/geocode?q=Mumbai")
+    assert r.status_code == 200
+    data = r.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+    assert "lat" in data[0]
+    assert "lon" in data[0]
+    assert "display_name" in data[0]
+
+    # Save a configuration estimate
+    config = {
+        "compare": True,
+        "tool": "ChatGPT",
+        "usage": 25,
+        "type": "coding",
+        "loc": "Mumbai, India",
+        "lat": 19.07,
+        "lon": 72.87
+    }
+    r = client.post("/api/estimates", json=config)
+    assert r.status_code == 200
+    res_save = r.json()
+    assert "id" in res_save
+    est_id = res_save["id"]
+
+    # Retrieve the saved estimate
+    r = client.get(f"/api/estimates/{est_id}")
+    assert r.status_code == 200
+    res_get = r.json()
+    assert res_get["id"] == est_id
+    assert res_get["config_data"]["tool"] == "ChatGPT"
+    assert res_get["config_data"]["usage"] == 25
+
+    # Get sitemap
+    r = client.get("/sitemap.xml")
+    assert r.status_code == 200
+    assert "xml" in r.headers.get("content-type", "")
+    assert f"/e/{est_id}" in r.text
+

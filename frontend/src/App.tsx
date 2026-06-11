@@ -21,6 +21,7 @@ export default function App() {
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/trust" element={<TrustPage />} />
           <Route path="/personal-estimator" element={<PersonalEstimatorPage />} />
+          <Route path="/e/:id" element={<PersonalEstimatorPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

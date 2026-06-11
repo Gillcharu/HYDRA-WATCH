@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams } from "react-router-dom";
 import { FadeIn } from "../components/AnimatedCounter";
 import { api } from "../lib/api";
 import type { Region } from "../types";
@@ -194,8 +194,66 @@ export function PersonalEstimatorPage() {
     return () => clearTimeout(delayDebounce);
   }, [locQueryB]);
 
+  const { id } = useParams<{ id: string }>();
+  const [loadingEstimate, setLoadingEstimate] = useState(false);
+  const [errorEstimate, setErrorEstimate] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+
+  // Load shared estimate configuration if short ID is present
+  useEffect(() => {
+    if (!id) return;
+    setLoadingEstimate(true);
+    setErrorEstimate(null);
+    fetch(`/api/estimates/${id}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Shared estimate not found");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        const config = data.config_data;
+        if (config) {
+          setCompareMode(config.compare === "true" || config.compare === true);
+          if (config.tool) setAiTool(config.tool);
+          if (config.usage !== undefined) setUsage(Number(config.usage) || 10);
+          if (config.type) setPromptType(config.type);
+          if (config.loc && config.lat !== undefined && config.lon !== undefined) {
+            setLocationCoords({
+              name: config.loc,
+              lat: Number(config.lat),
+              lon: Number(config.lon),
+            });
+          } else {
+            setLocationCoords(null);
+          }
+
+          if (config.toolB) setAiToolB(config.toolB);
+          if (config.usageB !== undefined) setUsageB(Number(config.usageB) || 10);
+          if (config.typeB) setPromptTypeB(config.typeB);
+          if (config.locB && config.latB !== undefined && config.lonB !== undefined) {
+            setLocationCoordsB({
+              name: config.locB,
+              lat: Number(config.latB),
+              lon: Number(config.lonB),
+            });
+          } else {
+            setLocationCoordsB(null);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setErrorEstimate(err.message || "Failed to load shared estimate");
+      })
+      .finally(() => {
+        setLoadingEstimate(false);
+      });
+  }, [id]);
+
   // Sync state changes to search parameters
   useEffect(() => {
+    if (id) return; // Do not overwrite search params if viewing a short estimate
     const params: Record<string, string> = {
       compare: compareMode.toString(),
       tool: aiTool,
@@ -219,6 +277,7 @@ export function PersonalEstimatorPage() {
     }
     setSearchParams(params, { replace: true });
   }, [
+    id,
     compareMode,
     aiTool,
     usage,
@@ -232,9 +291,58 @@ export function PersonalEstimatorPage() {
   ]);
 
   const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (sharing) return;
+    setSharing(true);
+
+    const config: Record<string, any> = {
+      compare: compareMode,
+      tool: aiTool,
+      usage: usage,
+      type: promptType,
+    };
+    if (locationCoords) {
+      config.loc = locationCoords.name;
+      config.lat = locationCoords.lat;
+      config.lon = locationCoords.lon;
+    }
+    if (compareMode) {
+      config.toolB = aiToolB;
+      config.usageB = usageB;
+      config.typeB = promptTypeB;
+      if (locationCoordsB) {
+        config.locB = locationCoordsB.name;
+        config.latB = locationCoordsB.lat;
+        config.lonB = locationCoordsB.lon;
+      }
+    }
+
+    fetch("/api/estimates", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(config),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Server error saving estimate");
+        return res.json();
+      })
+      .then((data) => {
+        const shareUrl = `${window.location.protocol}//${window.location.host}/e/${data.id}`;
+        navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to generate short link:", err);
+        // Fallback to copying standard query parameters URL
+        navigator.clipboard.writeText(window.location.href);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .finally(() => {
+        setSharing(false);
+      });
   };
 
   // Helper to resolve region parameters based on geocoded user location coordinates
@@ -450,6 +558,30 @@ export function PersonalEstimatorPage() {
       carbonDelta: carbonPct,
     };
   }, [compareMode, estimatesA, estimatesB]);
+
+  if (loadingEstimate) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-32 sm:px-6 flex flex-col items-center justify-center min-h-[50vh]">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-aqua-500 border-t-transparent" />
+        <p className="mt-4 text-sm text-slate-400 font-mono">Loading shared estimate...</p>
+      </div>
+    );
+  }
+
+  if (errorEstimate) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-32 sm:px-6 flex flex-col items-center justify-center min-h-[50vh]">
+        <div className="text-red-400 text-3xl mb-4">⚠️</div>
+        <p className="text-sm text-slate-300 font-display font-semibold">{errorEstimate}</p>
+        <button
+          onClick={() => window.location.href = "/personal-estimator"}
+          className="mt-6 rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-xs font-bold text-slate-300 hover:bg-white/10 transition"
+        >
+          Go to Estimator
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
