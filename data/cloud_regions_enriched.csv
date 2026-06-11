@@ -1,0 +1,122 @@
+provider,region_code,region_name,city,state,country,water_stress_score,water_stress_label,drought_risk,data_confidence,carbon_kg_per_kwh,carbon_source,carbon_year,carbon_confidence
+AWS,us-east-1,US East (N. Virginia),Ashburn,Virginia,United States,3.2034025499764867,High (40-80%),2.12952982459081,high,0.35,eGRID SERC Virginia,2023,high
+AWS,us-east-2,US East (Ohio),Columbus,Ohio,United States,0.0,Low (<10%),1.57826691533915,high,0.42,eGRID RFC Ohio,2023,high
+AWS,us-west-1,US West (N. California),San Jose,California,United States,5.0,Extremely High (>80%),2.1284469187254,high,0.22,eGRID WECC California,2023,high
+AWS,us-west-2,US West (Oregon),Boardman,Oregon,United States,5.0,Extremely High (>80%),1.31565937549423,high,0.28,eGRID WECC Oregon,2023,high
+AWS,ap-south-1,Asia Pacific (Mumbai),Mumbai,Maharashtra,India,4.6410274448928455,Extremely High (>80%),3.13546198521377,high,0.71,India national grid,2023,medium
+AWS,ap-south-2,Asia Pacific (Hyderabad),Hyderabad,Telangana,India,2.5969779126327888,Medium - High (20-40%),3.78989786309717,high,0.71,India national grid,2023,medium
+AWS,ap-southeast-1,Asia Pacific (Singapore),Singapore,Singapore,Singapore,0.0,Low (<10%),2.84744107074833,medium,0.41,Singapore grid,2023,high
+AWS,ap-southeast-2,Asia Pacific (Sydney),Sydney,New South Wales,Australia,2.091252919354797,Medium - High (20-40%),1.20906110736253,high,0.51,Australia NEM,2023,medium
+AWS,ap-northeast-1,Asia Pacific (Tokyo),Tokyo,Tokyo,Japan,2.5862115543754847,Medium - High (20-40%),2.31711746616855,high,0.47,Japan grid,2023,medium
+AWS,ap-northeast-2,Asia Pacific (Seoul),Seoul,Seoul,South Korea,2.189205381882296,Medium - High (20-40%),2.26382691595156,high,0.42,South Korea grid,2023,medium
+AWS,ap-northeast-3,Asia Pacific (Osaka),Osaka,Osaka,Japan,1.998780764249157,Low - Medium (10-20%),1.8813045104051,high,0.47,Japan grid,2023,medium
+AWS,eu-west-1,Europe (Ireland),Dublin,Leinster,Ireland,1.0690289403950055,Low - Medium (10-20%),2.8302254623675,high,0.28,Ireland grid,2023,high
+AWS,eu-west-2,Europe (London),London,England,United Kingdom,2.3859965097727995,Medium - High (20-40%),3.3886628573109,high,0.23,UK grid,2023,high
+AWS,eu-west-3,Europe (Paris),Paris,Ile-de-France,France,0.0384212821990496,Low (<10%),3.45138896638367,high,0.06,France grid,2023,high
+AWS,eu-central-1,Europe (Frankfurt),Frankfurt,Hesse,Germany,0.587936950148668,Low (<10%),2.69277865869799,high,0.35,Germany grid,2023,high
+AWS,eu-central-2,Europe (Zurich),Zurich,Zurich,Switzerland,0.0,Low (<10%),2.06626803898559,high,0.05,Switzerland grid,2023,high
+AWS,eu-north-1,Europe (Stockholm),Stockholm,Stockholm,Sweden,4.49522791472905,Extremely High (>80%),2.46544381521264,high,0.04,Sweden grid,2023,high
+AWS,eu-south-1,Europe (Milan),Milan,Lombardy,Italy,1.3602508179641,Low - Medium (10-20%),2.66077071592459,high,0.3,Italy grid,2023,medium
+AWS,sa-east-1,South America (Sao Paulo),Sao Paulo,Sao Paulo,Brazil,0.0,Low (<10%),2.46305870580962,high,0.09,Brazil grid,2023,medium
+AWS,ca-central-1,Canada (Central),Montreal,Quebec,Canada,0.0,Low (<10%),0.971432286362552,high,0.12,Quebec hydro-heavy grid,2023,high
+AWS,me-south-1,Middle East (Bahrain),Manama,Capital Governorate,Bahrain,5.0,Extremely High (>80%),2.0,medium,0.55,Bahrain grid,2023,medium
+AWS,af-south-1,Africa (Cape Town),Cape Town,Western Cape,South Africa,5.0,Extremely High (>80%),2.69346411385442,high,0.85,South Africa grid,2023,medium
+GCP,us-central1,Iowa,Council Bluffs,Iowa,United States,0.0,Low (<10%),2.57940319696247,high,0.38,eGRID MRO Iowa,2023,high
+GCP,us-east1,South Carolina,Moncks Corner,South Carolina,United States,0.0,Low (<10%),1.91350913495148,high,0.32,eGRID SERC South Carolina,2023,high
+GCP,us-east4,Northern Virginia,Ashburn,Virginia,United States,3.2034025499764867,High (40-80%),2.12952982459081,high,0.35,eGRID SERC Virginia,2023,high
+GCP,us-west1,Oregon,The Dalles,Oregon,United States,5.0,Extremely High (>80%),1.31565937549423,high,0.28,eGRID WECC Oregon,2023,high
+GCP,us-west2,Los Angeles,Los Angeles,California,United States,5.0,Extremely High (>80%),2.1284469187254,high,0.22,eGRID WECC California,2023,high
+GCP,us-west3,Salt Lake City,Salt Lake City,Utah,United States,5.0,Extremely High (>80%),1.46875529576896,high,0.45,eGRID WECC Utah,2023,high
+GCP,us-west4,Las Vegas,Las Vegas,Nevada,United States,0.6701146863701557,Low (<10%),1.50031228232988,high,0.4,eGRID WECC Nevada,2023,high
+GCP,asia-south1,Mumbai,Mumbai,Maharashtra,India,4.6410274448928455,Extremely High (>80%),3.13546198521377,high,0.71,India national grid,2023,medium
+GCP,asia-south2,Delhi,New Delhi,NCT of Delhi,India,4.288540894381674,Extremely High (>80%),4.48202052755002,high,0.71,India national grid,2023,medium
+GCP,asia-southeast1,Singapore,Singapore,Singapore,Singapore,0.0,Low (<10%),2.84744107074833,medium,0.41,Singapore grid,2023,high
+GCP,asia-east1,Taiwan,Changhua County,Taiwan,Taiwan,1.3631464867220768,Low - Medium (10-20%),2.0,medium,0.45,Taiwan grid,2023,medium
+GCP,asia-northeast1,Tokyo,Tokyo,Tokyo,Japan,2.5862115543754847,Medium - High (20-40%),2.31711746616855,high,0.47,Japan grid,2023,medium
+GCP,europe-west1,Belgium,St. Ghislain,Hainaut,Belgium,2.950685256769663,Medium - High (20-40%),3.34252299146301,high,0.14,Belgium grid,2023,high
+GCP,europe-west2,London,London,England,United Kingdom,2.3859965097727995,Medium - High (20-40%),3.3886628573109,high,0.23,UK grid,2023,high
+GCP,europe-west3,Frankfurt,Frankfurt,Hesse,Germany,0.587936950148668,Low (<10%),2.69277865869799,high,0.35,Germany grid,2023,high
+GCP,europe-west4,Netherlands,Eemshaven,Groningen,Netherlands,1.2732028159255937,Low - Medium (10-20%),2.49649025069571,high,0.37,Netherlands grid,2023,high
+GCP,europe-north1,Finland,Hamina,Kymenlaakso,Finland,0.0,Low (<10%),1.39684231089242,medium,0.09,Finland grid,2023,high
+GCP,southamerica-east1,Sao Paulo,Sao Paulo,Sao Paulo,Brazil,0.0,Low (<10%),2.46305870580962,high,0.09,Brazil grid,2023,medium
+GCP,australia-southeast1,Sydney,Sydney,New South Wales,Australia,2.091252919354797,Medium - High (20-40%),1.20906110736253,high,0.51,Australia NEM,2023,medium
+Azure,eastus,East US,Boydton,Virginia,United States,3.2034025499764867,High (40-80%),2.12952982459081,high,0.35,eGRID SERC Virginia,2023,high
+Azure,eastus2,East US 2,Richmond,Virginia,United States,3.2034025499764867,High (40-80%),2.12952982459081,high,0.35,eGRID SERC Virginia,2023,high
+Azure,westus,West US,San Jose,California,United States,5.0,Extremely High (>80%),2.1284469187254,high,0.22,eGRID WECC California,2023,high
+Azure,westus2,West US 2,Quincy,Washington,United States,0.0,Low (<10%),1.72633988056408,high,0.09,eGRID WECC Washington hydro,2023,high
+Azure,westus3,West US 3,Phoenix,Arizona,United States,5.0,Extremely High (>80%),1.27673039345129,high,0.4,eGRID WECC Arizona,2023,high
+Azure,centralus,Central US,Des Moines,Iowa,United States,0.0,Low (<10%),2.57940319696247,high,0.38,eGRID MRO Iowa,2023,high
+Azure,southcentralus,South Central US,San Antonio,Texas,United States,0.0,Low (<10%),2.0330886375395,high,0.42,eGRID ERCOT Texas,2023,high
+Azure,northcentralus,North Central US,Chicago,Illinois,United States,2.671208037573646,Medium - High (20-40%),2.11083573489004,high,0.45,eGRID RFC Illinois,2023,high
+Azure,centralindia,Central India,Pune,Maharashtra,India,4.6410274448928455,Extremely High (>80%),3.13546198521377,high,0.71,India national grid,2023,medium
+Azure,southindia,South India,Chennai,Tamil Nadu,India,4.943346226421216,Extremely High (>80%),4.02881750726778,high,0.71,India national grid,2023,medium
+Azure,westindia,West India,Mumbai,Maharashtra,India,4.6410274448928455,Extremely High (>80%),3.13546198521377,high,0.71,India national grid,2023,medium
+Azure,eastasia,East Asia,Hong Kong,Hong Kong,Hong Kong,1.840089816056499,Low - Medium (10-20%),2.70410664680096,medium,0.48,Hong Kong grid,2023,medium
+Azure,southeastasia,Southeast Asia,Singapore,Singapore,Singapore,0.0,Low (<10%),2.84744107074833,medium,0.41,Singapore grid,2023,high
+Azure,japaneast,Japan East,Tokyo,Tokyo,Japan,2.5862115543754847,Medium - High (20-40%),2.31711746616855,high,0.47,Japan grid,2023,medium
+Azure,japanwest,Japan West,Osaka,Osaka,Japan,1.998780764249157,Low - Medium (10-20%),1.8813045104051,high,0.47,Japan grid,2023,medium
+Azure,northeurope,North Europe,Dublin,Leinster,Ireland,1.0690289403950055,Low - Medium (10-20%),2.8302254623675,high,0.28,Ireland grid,2023,high
+Azure,westeurope,West Europe,Amsterdam,North Holland,Netherlands,0.587936950148668,Low (<10%),2.44281617883515,high,0.37,Netherlands grid,2023,high
+Azure,germanywestcentral,Germany West Central,Frankfurt,Hesse,Germany,0.587936950148668,Low (<10%),2.69277865869799,high,0.35,Germany grid,2023,high
+Azure,norwayeast,Norway East,Oslo,Oslo,Norway,0.0,Low (<10%),1.54218904386025,high,0.02,Norway grid,2023,high
+Azure,swedencentral,Sweden Central,Gavle,Gavleborg,Sweden,0.0,Low (<10%),0.455609139636039,high,0.04,Sweden grid,2023,high
+Azure,brazilsouth,Brazil South,Campinas,Sao Paulo,Brazil,0.0,Low (<10%),2.46305870580962,high,0.09,Brazil grid,2023,medium
+Azure,australiaeast,Australia East,Sydney,New South Wales,Australia,2.091252919354797,Medium - High (20-40%),1.20906110736253,high,0.51,Australia NEM,2023,medium
+Azure,southafricanorth,South Africa North,Johannesburg,Gauteng,South Africa,5.0,Extremely High (>80%),2.93157603171029,high,0.85,South Africa grid,2023,medium
+OCI,us-ashburn-1,US East (Ashburn),Ashburn,Virginia,United States,3.2034025499764867,High (40-80%),2.12952982459081,high,0.35,eGRID SERC Virginia,2023,high
+OCI,us-phoenix-1,US West (Phoenix),Phoenix,Arizona,United States,5.0,Extremely High (>80%),1.27673039345129,high,0.4,eGRID WECC Arizona,2023,high
+OCI,us-sanjose-1,US West (San Jose),San Jose,California,United States,5.0,Extremely High (>80%),2.1284469187254,high,0.22,eGRID WECC California,2023,high
+OCI,us-chicago-1,US Midwest (Chicago),Chicago,Illinois,United States,2.671208037573646,Medium - High (20-40%),2.11083573489004,high,0.45,eGRID RFC Illinois,2023,high
+OCI,ca-montreal-1,Canada Southeast (Montreal),Montreal,Quebec,Canada,0.0,Low (<10%),0.971432286362552,high,0.12,Quebec hydro grid,2023,high
+OCI,sa-saopaulo-1,Brazil East (Sao Paulo),Sao Paulo,Sao Paulo,Brazil,0.0,Low (<10%),2.46305870580962,high,0.09,Brazil grid,2023,medium
+OCI,uk-london-1,UK South (London),London,England,United Kingdom,2.3859965097727995,Medium - High (20-40%),3.3886628573109,high,0.23,UK grid,2023,high
+OCI,eu-frankfurt-1,Germany Central (Frankfurt),Frankfurt,Hesse,Germany,0.587936950148668,Low (<10%),2.69277865869799,high,0.35,Germany grid,2023,high
+OCI,eu-amsterdam-1,Netherlands Northwest (Amsterdam),Amsterdam,North Holland,Netherlands,0.587936950148668,Low (<10%),2.44281617883515,high,0.37,Netherlands grid,2023,high
+OCI,eu-zurich-1,Switzerland North (Zurich),Zurich,Zurich,Switzerland,0.0,Low (<10%),2.06626803898559,high,0.05,Switzerland grid,2023,high
+OCI,eu-marseille-1,France South (Marseille),Marseille,Provence,France,1.8678039925359222,Low - Medium (10-20%),3.02419407978011,medium,0.06,France grid,2023,high
+OCI,me-jeddah-1,Saudi Arabia West (Jeddah),Jeddah,Makkah,Saudi Arabia,4.490070641900202,Extremely High (>80%),3.83509285385071,high,0.52,Saudi Arabia national average,2023,medium
+OCI,me-dubai-1,UAE East (Dubai),Dubai,Dubai,United Arab Emirates,5.0,Extremely High (>80%),2.0,medium,0.55,United Arab Emirates national average,2023,medium
+OCI,il-jerusalem-1,Israel Central (Jerusalem),Jerusalem,Jerusalem,Israel,5.0,Extremely High (>80%),3.62394011741416,high,0.45,Israel national average,2023,medium
+OCI,ap-tokyo-1,Japan East (Tokyo),Tokyo,Tokyo,Japan,2.5862115543754847,Medium - High (20-40%),2.31711746616855,high,0.47,Japan grid,2023,medium
+OCI,ap-seoul-1,South Korea Central (Seoul),Seoul,Seoul,South Korea,2.189205381882296,Medium - High (20-40%),2.26382691595156,high,0.42,South Korea grid,2023,medium
+OCI,ap-singapore-1,Singapore,Singapore,Singapore,Singapore,0.0,Low (<10%),2.84744107074833,medium,0.41,Singapore grid,2023,high
+OCI,ap-sydney-1,Australia Southeast (Sydney),Sydney,New South Wales,Australia,2.091252919354797,Medium - High (20-40%),1.20906110736253,high,0.51,Australia NEM,2023,medium
+OCI,ap-mumbai-1,India West (Mumbai),Mumbai,Maharashtra,India,4.6410274448928455,Extremely High (>80%),3.13546198521377,high,0.71,India national grid,2023,medium
+OCI,ap-hyderabad-1,India South (Hyderabad),Hyderabad,Telangana,India,2.5969779126327888,Medium - High (20-40%),3.78989786309717,high,0.71,India national grid,2023,medium
+IBM,us-east,Dallas,Dallas,Texas,United States,0.0,Low (<10%),2.0330886375395,high,0.42,eGRID ERCOT Texas,2023,high
+IBM,us-south,Houston,Houston,Texas,United States,0.0,Low (<10%),2.0330886375395,high,0.42,eGRID ERCOT Texas,2023,high
+IBM,us-east-1,Washington DC,Washington,District of Columbia,United States,1.126947793433607,Low - Medium (10-20%),2.06680634254929,high,0.35,eGRID SERC Virginia,2023,high
+IBM,eu-de,Frankfurt,Frankfurt,Hesse,Germany,0.587936950148668,Low (<10%),2.69277865869799,high,0.35,Germany grid,2023,high
+IBM,eu-gb,London,London,England,United Kingdom,2.3859965097727995,Medium - High (20-40%),3.3886628573109,high,0.23,UK grid,2023,high
+IBM,eu-es,Madrid,Madrid,Madrid,Spain,3.323162626375811,High (40-80%),3.075174882166045,medium,0.25,Spain grid,2023,medium
+IBM,jp-tok,Tokyo,Tokyo,Tokyo,Japan,2.5862115543754847,Medium - High (20-40%),2.31711746616855,high,0.47,Japan grid,2023,medium
+IBM,jp-osa,Osaka,Osaka,Osaka,Japan,1.998780764249157,Low - Medium (10-20%),1.8813045104051,high,0.47,Japan grid,2023,medium
+IBM,au-syd,Sydney,Sydney,New South Wales,Australia,2.091252919354797,Medium - High (20-40%),1.20906110736253,high,0.51,Australia NEM,2023,medium
+IBM,ca-tor,Toronto,Toronto,Ontario,Canada,0.0,Low (<10%),1.43345667514512,high,0.12,Ontario grid,2023,medium
+IBM,br-sao,Sao Paulo,Sao Paulo,Sao Paulo,Brazil,0.0,Low (<10%),2.46305870580962,high,0.09,Brazil grid,2023,medium
+IBM,in-che,Chennai,Chennai,Tamil Nadu,India,4.943346226421216,Extremely High (>80%),4.02881750726778,high,0.71,India national grid,2023,medium
+Alibaba,cn-hangzhou,China East 1 (Hangzhou),Hangzhou,Zhejiang,China,1.1259790211671843,Low - Medium (10-20%),3.32593360342363,high,0.55,China East grid,2023,medium
+Alibaba,cn-shanghai,China East 2 (Shanghai),Shanghai,Shanghai,China,2.173164446735225,Medium - High (20-40%),3.68047572253115,high,0.55,China East grid,2023,medium
+Alibaba,cn-beijing,China North 2 (Beijing),Beijing,Beijing,China,4.517148324165852,Extremely High (>80%),2.96620151745388,high,0.58,China North grid,2023,medium
+Alibaba,cn-shenzhen,China South 1 (Shenzhen),Shenzhen,Guangdong,China,2.6261827503993302,Medium - High (20-40%),2.75123573657144,high,0.52,China South grid,2023,medium
+Alibaba,cn-hongkong,China Hong Kong,Hong Kong,Hong Kong,Hong Kong,1.840089816056499,Low - Medium (10-20%),2.70410664680096,medium,0.48,Hong Kong grid,2023,medium
+Alibaba,ap-southeast-1,Singapore,Singapore,Singapore,Singapore,0.0,Low (<10%),2.84744107074833,medium,0.41,Singapore grid,2023,high
+Alibaba,ap-southeast-2,Australia (Sydney),Sydney,New South Wales,Australia,2.091252919354797,Medium - High (20-40%),1.20906110736253,high,0.51,Australia NEM,2023,medium
+Alibaba,ap-southeast-3,Malaysia (Kuala Lumpur),Kuala Lumpur,Kuala Lumpur,Malaysia,0.9520531624485752,Low (<10%),2.78245409809281,high,0.62,Malaysia national average,2023,medium
+Alibaba,ap-southeast-5,Indonesia (Jakarta),Jakarta,Jakarta,Indonesia,1.1406114057269363,Low - Medium (10-20%),3.36499973124904,medium,0.68,Indonesia national average,2023,medium
+Alibaba,ap-northeast-1,Japan (Tokyo),Tokyo,Tokyo,Japan,2.5862115543754847,Medium - High (20-40%),2.31711746616855,high,0.47,Japan grid,2023,medium
+Alibaba,ap-south-1,India (Mumbai),Mumbai,Maharashtra,India,4.6410274448928455,Extremely High (>80%),3.13546198521377,high,0.71,India national grid,2023,medium
+Alibaba,us-west-1,US West 1 (Silicon Valley),San Jose,California,United States,5.0,Extremely High (>80%),2.1284469187254,high,0.22,eGRID WECC California,2023,high
+Alibaba,us-east-1,US East 1 (Virginia),Ashburn,Virginia,United States,3.2034025499764867,High (40-80%),2.12952982459081,high,0.35,eGRID SERC Virginia,2023,high
+Alibaba,eu-central-1,Germany (Frankfurt),Frankfurt,Hesse,Germany,0.587936950148668,Low (<10%),2.69277865869799,high,0.35,Germany grid,2023,high
+Alibaba,me-east-1,UAE (Dubai),Dubai,Dubai,United Arab Emirates,5.0,Extremely High (>80%),2.0,medium,0.55,UAE grid,2023,medium
+DigitalOcean,nyc1,New York 1,New York,New York,United States,0.0,Low (<10%),1.40032991481779,high,0.35,eGRID SERC New York,2023,high
+DigitalOcean,nyc3,New York 3,New York,New York,United States,0.0,Low (<10%),1.40032991481779,high,0.35,eGRID SERC New York,2023,high
+DigitalOcean,sfo3,San Francisco 3,San Francisco,California,United States,5.0,Extremely High (>80%),2.1284469187254,high,0.22,eGRID WECC California,2023,high
+DigitalOcean,ams3,Amsterdam 3,Amsterdam,North Holland,Netherlands,0.587936950148668,Low (<10%),2.44281617883515,high,0.37,Netherlands grid,2023,high
+DigitalOcean,lon1,London 1,London,England,United Kingdom,2.3859965097727995,Medium - High (20-40%),3.3886628573109,high,0.23,UK grid,2023,high
+DigitalOcean,fra1,Frankfurt 1,Frankfurt,Hesse,Germany,0.587936950148668,Low (<10%),2.69277865869799,high,0.35,Germany grid,2023,high
+DigitalOcean,sgp1,Singapore 1,Singapore,Singapore,Singapore,0.0,Low (<10%),2.84744107074833,medium,0.41,Singapore grid,2023,high
+DigitalOcean,tor1,Toronto 1,Toronto,Ontario,Canada,0.0,Low (<10%),1.43345667514512,high,0.12,Ontario grid,2023,medium
+DigitalOcean,blr1,Bangalore 1,Bangalore,Karnataka,India,5.0,Extremely High (>80%),3.97105488545531,high,0.71,India national grid,2023,medium
+DigitalOcean,syd1,Sydney 1,Sydney,New South Wales,Australia,2.091252919354797,Medium - High (20-40%),1.20906110736253,high,0.51,Australia NEM,2023,medium

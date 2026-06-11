@@ -1,0 +1,26 @@
+# HydraWatch Carbon & Water Gate CI Pipeline
+name: Sustainability Gated Deployment
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  sustainability-gate:
+    name: Check Sustainability Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: HydraWatch Sustainability Gating
+        uses: ./actions/deploy-gate
+        with:
+          provider: 'AWS'
+          region: 'eu-north-1'
+          min_score: '50.0'
+          min_tier: 'V0'
+          api_key: ${{ secrets.HYDRAWATCH_API_KEY }}
+          api_url: 'https://api.hydrawatch.com'

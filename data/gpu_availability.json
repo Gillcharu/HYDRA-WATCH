@@ -1,0 +1,1005 @@
+{
+  "us-east-1": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-east-2": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-west-1": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-west-2": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-south-1": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-south-2": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-southeast-1": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-southeast-2": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-northeast-1": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-northeast-2": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-northeast-3": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-west-1": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-west-2": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-west-3": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-central-1": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-central-2": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-north-1": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-south-1": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "sa-east-1": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ca-central-1": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "me-south-1": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "V100",
+      "T4"
+    ]
+  },
+  "af-south-1": {
+    "provider": "AWS",
+    "gpus": [
+      "A100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-central1": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-east1": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-east4": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-west1": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-west2": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-west3": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-west4": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "asia-south1": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "asia-south2": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "asia-southeast1": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "asia-east1": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "asia-northeast1": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "europe-west1": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "europe-west2": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "europe-west3": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "europe-west4": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "europe-north1": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "southamerica-east1": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "australia-southeast1": {
+    "provider": "GCP",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eastus": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eastus2": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "westus": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "westus2": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "westus3": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "centralus": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "southcentralus": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "northcentralus": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "centralindia": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "southindia": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "westindia": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eastasia": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "southeastasia": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "japaneast": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "japanwest": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "northeurope": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "westeurope": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "germanywestcentral": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "norwayeast": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "swedencentral": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "brazilsouth": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "V100",
+      "T4"
+    ]
+  },
+  "australiaeast": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "southafricanorth": {
+    "provider": "Azure",
+    "gpus": [
+      "A100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-ashburn-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-phoenix-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-sanjose-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-chicago-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ca-montreal-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "sa-saopaulo-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "uk-london-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-frankfurt-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-amsterdam-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-zurich-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-marseille-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "me-jeddah-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "me-dubai-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "il-jerusalem-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-tokyo-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-seoul-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-singapore-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-sydney-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-mumbai-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-hyderabad-1": {
+    "provider": "OCI",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-east": {
+    "provider": "IBM",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "us-south": {
+    "provider": "IBM",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-de": {
+    "provider": "IBM",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-gb": {
+    "provider": "IBM",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "eu-es": {
+    "provider": "IBM",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "jp-tok": {
+    "provider": "IBM",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "jp-osa": {
+    "provider": "IBM",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "au-syd": {
+    "provider": "IBM",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ca-tor": {
+    "provider": "IBM",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "br-sao": {
+    "provider": "IBM",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "in-che": {
+    "provider": "IBM",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "cn-hangzhou": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "cn-shanghai": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "cn-beijing": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "cn-shenzhen": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "cn-hongkong": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-southeast-3": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "ap-southeast-5": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "me-east-1": {
+    "provider": "Alibaba",
+    "gpus": [
+      "A100",
+      "H100",
+      "V100",
+      "T4"
+    ]
+  },
+  "nyc1": {
+    "provider": "DigitalOcean",
+    "gpus": [
+      "V100",
+      "A100",
+      "T4"
+    ]
+  },
+  "nyc3": {
+    "provider": "DigitalOcean",
+    "gpus": [
+      "V100",
+      "A100",
+      "T4"
+    ]
+  },
+  "sfo3": {
+    "provider": "DigitalOcean",
+    "gpus": [
+      "V100",
+      "A100",
+      "T4"
+    ]
+  },
+  "ams3": {
+    "provider": "DigitalOcean",
+    "gpus": [
+      "V100",
+      "A100",
+      "T4"
+    ]
+  },
+  "lon1": {
+    "provider": "DigitalOcean",
+    "gpus": [
+      "V100",
+      "A100",
+      "T4"
+    ]
+  },
+  "fra1": {
+    "provider": "DigitalOcean",
+    "gpus": [
+      "V100",
+      "A100",
+      "T4"
+    ]
+  },
+  "sgp1": {
+    "provider": "DigitalOcean",
+    "gpus": [
+      "V100",
+      "A100",
+      "T4"
+    ]
+  },
+  "tor1": {
+    "provider": "DigitalOcean",
+    "gpus": [
+      "V100",
+      "A100",
+      "T4"
+    ]
+  },
+  "blr1": {
+    "provider": "DigitalOcean",
+    "gpus": [
+      "V100",
+      "A100",
+      "T4"
+    ]
+  },
+  "syd1": {
+    "provider": "DigitalOcean",
+    "gpus": [
+      "V100",
+      "A100",
+      "T4"
+    ]
+  }
+}

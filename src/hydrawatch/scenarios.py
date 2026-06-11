@@ -1,0 +1,73 @@
+"""One-click workload scenarios for the web UI and API."""
+
+SCENARIOS: list[dict] = [
+    {
+        "id": "india_llm",
+        "emoji": "🇮🇳",
+        "title": "LLM chatbot in India",
+        "blurb": "70B model on AWS Mumbai — typical SaaS traffic",
+        "tag": "Most common demo",
+        "provider": "AWS",
+        "region": "ap-south-1",
+        "model": "LLaMA-3-70B",
+        "gpu": "A100",
+        "qps": 150,
+        "tokens": 1000,
+        "location": "India",
+        "latency": 150,
+    },
+    {
+        "id": "us_api",
+        "emoji": "🇺🇸",
+        "title": "Lightweight US API",
+        "blurb": "Small model, low cost — GCP Iowa",
+        "tag": "Edge / API",
+        "provider": "GCP",
+        "region": "us-central1",
+        "model": "Mistral-7B",
+        "gpu": "T4",
+        "qps": 80,
+        "tokens": 512,
+        "location": "United States",
+        "latency": 80,
+    },
+    {
+        "id": "eu_enterprise",
+        "emoji": "🇪🇺",
+        "title": "Enterprise EU chat",
+        "blurb": "High-traffic GPT-class — Azure Amsterdam",
+        "tag": "Enterprise",
+        "provider": "Azure",
+        "region": "westeurope",
+        "model": "GPT-4",
+        "gpu": "H100",
+        "qps": 200,
+        "tokens": 2000,
+        "location": "Europe",
+        "latency": 100,
+    },
+    {
+        "id": "india_training",
+        "emoji": "🔥",
+        "title": "Training burst India",
+        "blurb": "Heavy batch job — AWS Mumbai H100",
+        "tag": "Training",
+        "provider": "AWS",
+        "region": "ap-south-1",
+        "model": "LLaMA-3-70B",
+        "gpu": "H100",
+        "qps": 30,
+        "tokens": 4096,
+        "location": "India",
+        "latency": 200,
+    },
+]
+
+TRAFFIC_LEVELS = {
+    "Low (startup)": {"qps": 30, "tokens": 512},
+    "Medium (growth)": {"qps": 100, "tokens": 1000},
+    "High (scale)": {"qps": 250, "tokens": 1500},
+    "Enterprise": {"qps": 400, "tokens": 2000},
+}
+
+DEFAULT_SCENARIO_ID = "india_llm"

@@ -1,0 +1,662 @@
+[
+  {
+    "region": "ap-south-1",
+    "water": 266576.832,
+    "carbon": 78862.3128,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 266576.832,
+    "carbon": 78862.3128,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 19193.531903999996,
+    "carbon": 5678.086521599998,
+    "qps": 10.8
+  },
+  {
+    "region": "ap-south-1",
+    "water": 266576.832,
+    "carbon": 78862.3128,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 266576.832,
+    "carbon": 78862.3128,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 6249.851135999999,
+    "carbon": 1848.9142943999996,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 266576.832,
+    "carbon": 78862.3128,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "us-central1",
+    "water": 96.36096960000002,
+    "carbon": 26.15512032000001,
+    "qps": 2.7
+  },
+  {
+    "region": "westeurope",
+    "water": 25658.020080000002,
+    "carbon": 8630.424936,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 17197.404585984,
+    "carbon": 5087.565523353601,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 20082.121344,
+    "carbon": 5940.960897599999,
+    "qps": 11.3
+  },
+  {
+    "region": "ap-south-1",
+    "water": 56551.25370470402,
+    "carbon": 16729.745887641602,
+    "qps": 11.3
+  },
+  {
+    "region": "us-central1",
+    "water": 96.36096960000002,
+    "carbon": 26.15512032000001,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 266576.832,
+    "carbon": 78862.3128,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "us-central1",
+    "water": 96.36096960000002,
+    "carbon": 26.15512032000001,
+    "qps": 2.7
+  },
+  {
+    "region": "westeurope",
+    "water": 25658.020080000002,
+    "carbon": 8630.424936,
+    "qps": 2.7
+  },
+  {
+    "region": "westeurope",
+    "water": 25658.020080000002,
+    "carbon": 8630.424936,
+    "qps": 2.7
+  },
+  {
+    "region": "westeurope",
+    "water": 25658.020080000002,
+    "carbon": 8630.424936,
+    "qps": 2.7
+  },
+  {
+    "region": "westeurope",
+    "water": 25658.020080000002,
+    "carbon": 8630.424936,
+    "qps": 2.7
+  },
+  {
+    "region": "westeurope",
+    "water": 25658.020080000002,
+    "carbon": 8630.424936,
+    "qps": 2.7
+  },
+  {
+    "region": "westeurope",
+    "water": 25658.020080000002,
+    "carbon": 8630.424936,
+    "qps": 2.7
+  },
+  {
+    "region": "westeurope",
+    "water": 25658.020080000002,
+    "carbon": 8630.424936,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 266576.832,
+    "carbon": 78862.3128,
+    "qps": 150
+  },
+  {
+    "region": "ap-mumbai-1",
+    "water": 266576.832,
+    "carbon": 78862.3128,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 266576.832,
+    "carbon": 78862.3128,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 4798.382975999999,
+    "carbon": 1419.5216303999996,
+    "qps": 2.7
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 8979.718309859154,
+    "carbon": 448.98591549295764,
+    "qps": 100
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 8979.718309859154,
+    "carbon": 448.98591549295764,
+    "qps": 100
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 8979.718309859154,
+    "carbon": 448.98591549295764,
+    "qps": 100
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 8979.718309859154,
+    "carbon": 448.98591549295764,
+    "qps": 100
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 8979.718309859154,
+    "carbon": 448.98591549295764,
+    "qps": 100
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 8979.718309859154,
+    "carbon": 448.98591549295764,
+    "qps": 100
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150
+  },
+  {
+    "region": "eu-north-1",
+    "water": 13469.57746478873,
+    "carbon": 673.4788732394366,
+    "qps": 150
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  },
+  {
+    "region": "ap-south-1",
+    "water": 42868.39436619718,
+    "carbon": 12681.9,
+    "qps": 150.0
+  }
+]

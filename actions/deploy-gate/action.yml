@@ -1,0 +1,40 @@
+name: 'HydraWatch Sustainability Deploy Gate'
+description: 'Blocks CI/CD builds if the target region carbon/water sustainability score is below minimum limits'
+inputs:
+  provider:
+    description: 'Cloud Provider (AWS, GCP, Azure, OCI)'
+    required: true
+    default: 'AWS'
+  region:
+    description: 'Cloud Region code (e.g. ap-south-1)'
+    required: true
+    default: 'ap-south-1'
+  min_score:
+    description: 'Minimum sustainability score (0-100)'
+    required: false
+    default: '40.0'
+  min_tier:
+    description: 'Minimum verification tier (V0, V1, V2, V3, V4)'
+    required: false
+    default: 'V0'
+  api_key:
+    description: 'Corporate multi-tenant API key'
+    required: false
+  api_url:
+    description: 'HydraWatch API server base URL'
+    required: false
+    default: 'http://localhost:8080'
+runs:
+  using: 'composite'
+  steps:
+    - name: Run gate-check script
+      shell: bash
+      run: |
+        chmod +x ${{ github.action_path }}/gate-check.sh
+        ${{ github.action_path }}/gate-check.sh \
+          "${{ inputs.provider }}" \
+          "${{ inputs.region }}" \
+          "${{ inputs.min_score }}" \
+          "${{ inputs.min_tier }}" \
+          "${{ inputs.api_key }}" \
+          "${{ inputs.api_url }}"

@@ -1,0 +1,9 @@
+services:
+  hydrawatch:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - ELECTRICITY_MAPS_API_KEY=${ELECTRICITY_MAPS_API_KEY:-}
+    volumes:
+      - ./data:/app/data

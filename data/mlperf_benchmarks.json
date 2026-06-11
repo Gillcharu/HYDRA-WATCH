@@ -1,0 +1,22 @@
+{
+  "_citation": "MLPerf Inference v3.1 + NVIDIA TDP datasheets (2023-2024). Used for benchmark-based energy (V2).",
+  "benchmarks": {
+    "LLaMA-3-70B": {
+      "A100": {"tokens_per_sec": 2840, "avg_power_watts": 385, "source": "MLPerf Inference 3.1 datacenter", "batch": 1},
+      "H100": {"tokens_per_sec": 5200, "avg_power_watts": 620, "source": "MLPerf Inference 3.1 H100", "batch": 1},
+      "V100": {"tokens_per_sec": 890, "avg_power_watts": 280, "source": "MLPerf extrapolated", "batch": 1}
+    },
+    "LLaMA-3-8B": {
+      "A100": {"tokens_per_sec": 4200, "avg_power_watts": 220, "source": "MLPerf Inference 3.1", "batch": 1},
+      "H100": {"tokens_per_sec": 7800, "avg_power_watts": 350, "source": "MLPerf Inference 3.1", "batch": 1},
+      "T4": {"tokens_per_sec": 1200, "avg_power_watts": 65, "source": "NVIDIA T4 LLM serving guide", "batch": 1}
+    },
+    "Mistral-7B": {
+      "A100": {"tokens_per_sec": 4500, "avg_power_watts": 210, "source": "Published serving benchmarks 2024", "batch": 1},
+      "T4": {"tokens_per_sec": 1300, "avg_power_watts": 62, "source": "NVIDIA T4 serving", "batch": 1}
+    },
+    "GPT-4": {
+      "H100": {"tokens_per_sec": 1800, "avg_power_watts": 680, "source": "Large-model proxy (70B×2.5 mult)", "batch": 1}
+    }
+  }
+}
