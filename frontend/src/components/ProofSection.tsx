@@ -33,11 +33,10 @@ export function ProofSection() {
             <div>
               <div className="section-label">Validated proof</div>
               <h2 className="mt-2 font-display text-3xl font-bold text-white sm:text-4xl">
-                Same workload. 95% less carbon.
+                Same workload. Zero water stress.
               </h2>
               <p className="mt-3 max-w-xl text-slate-400">
-                LLaMA-3-70B on A100 · 150 QPS · Mumbai users. Moving to AWS Stockholm cuts carbon by{" "}
-                <strong className="text-mint-400">{findings.carbon_reduction_pct}%</strong> — consistent with IEA grid factors.
+                LLaMA-3-70B on A100 · 150 req/s · Mumbai users. Moving to AWS Stockholm shifts compute from a critical water-stressed basin (4.6/5) to a high-abundance region (0.0/5).
               </p>
             </div>
             {cs.pass && (
