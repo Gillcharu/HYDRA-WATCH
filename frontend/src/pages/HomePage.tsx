@@ -82,7 +82,7 @@ export function HomePage() {
           <FadeIn delay={0.2}>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-400">
               HydraWatch models water, carbon, and cost for every major cloud region — then recommends greener
-              alternatives within your latency budget. The decision layer infrastructure, ESG, and risk teams have been missing.
+              alternatives within your latency budget. The sustainability decision layer for global AI infrastructure.
             </p>
           </FadeIn>
 
@@ -137,7 +137,7 @@ export function HomePage() {
         <div className="mx-auto max-w-7xl">
           <FadeIn>
             <div className="section-label">Capabilities</div>
-            <h2 className="mt-2 font-display text-3xl font-bold text-white">Built for infra teams and ESG leaders</h2>
+            <h2 className="mt-2 font-display text-3xl font-bold text-white">AI infrastructure sustainability intelligence</h2>
           </FadeIn>
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {BENTO.map((f, i) => (
