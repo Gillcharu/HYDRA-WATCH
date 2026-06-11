@@ -132,7 +132,7 @@ export function HomePage() {
                   Estimate the footprint of one AI search
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm text-slate-400">
-                  Curious about the environmental impact of your daily AI assistants? Estimate the water, energy, and carbon consumed by a single query across ChatGPT, Gemini, Claude, or Copilot.
+                  Estimate the water, energy, and carbon consumed by a single query across ChatGPT, Gemini, Claude, or Copilot.
                 </p>
               </div>
               <Link to="/personal-estimator" className="btn-glow shrink-0">
