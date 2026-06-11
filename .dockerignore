@@ -1,0 +1,30 @@
+# Git
+.git
+.gitignore
+.github
+
+# Node / Frontend build output
+node_modules
+frontend/node_modules
+frontend/dist
+build
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.venv
+venv
+*.egg-info
+
+# Local Databases and logs
+data/hydrawatch.db
+*.db
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*
