@@ -161,9 +161,6 @@ export function PlatformPage() {
             Connect workload data from cloud, logs, billing, or MLOps systems. HydraWatch detects the deployment shape
             and returns water, carbon, cost, and greener cross-cloud alternatives.
           </p>
-          <div className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-2.5 text-xs text-slate-400 max-w-2xl">
-            <span className="font-semibold text-amber-300">Prototype Security Note:</span> HydraWatch does not store cloud credentials in this prototype. Connected-source cards are illustrative unless configured by an organization.
-          </div>
         </FadeIn>
 
         <div className="mt-8 grid gap-3 md:grid-cols-4">
