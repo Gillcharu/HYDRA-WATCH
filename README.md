@@ -1,151 +1,161 @@
+<div align="center">
+
 # 💧 HydraWatch
 
-**Global AI Infrastructure Sustainability Platform** — Analyze, optimize, and verify AI workload carbon emissions, power grids, and water stress intensity across 121 cloud regions worldwide before deployment.
+### The Sustainability Decision Layer for Global AI Infrastructure
+
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+
+**Analyze, optimize, and verify AI workload carbon emissions, power grids, and water stress intensity across 121 cloud regions worldwide before you deploy.**
+
+[Explore Platform](#-core-features) • [Local Setup](#-quick-start) • [Docker Compose](#-docker-orchestration) • [API & CLI](#-developer-apis--cli)
+
+</div>
 
 ---
 
-## 🌟 Key Features
+## ⚡ Core Features
 
-*   **Multi-Cloud Coverage**: 121 global data center regions spanning AWS, Google Cloud, Microsoft Azure, Oracle Cloud (OCI), Alibaba Cloud, IBM Cloud, and DigitalOcean.
-*   **3D Interactive Globe**: Rich Canvas-based interactive sphere showcasing live grid sustainability scores, water scarcity stress index, and carbon bands.
-*   **Personal AI Use Estimator**: Modeled calculation engine detailing energy consumption (Wh), direct/indirect water use (L), and carbon footprint (g CO₂e) per query with standard LED bulb, distance driven, and running tap equivalencies.
-*   **A/B Comparison Mode**: Side-by-side calculation comparator with dynamic Recharts visualization tooltips and percentage difference calculators.
-*   **Database Persistence**: Fully persisted geocoding cache tables and saved configuration short links (`/e/:id`) using SQLAlchemy (supporting auto-provisioned PostgreSQL in production and local SQLite fallback out-of-the-box).
-*   **API Security & Infrastructure**: Client IP sliding window rate limiting (100 req/min) protecting backend resources, Google Maps Geocoding API compatibility, and dynamic search engine indexable `/sitemap.xml` SEO generation.
-*   **Sustainability Gates**: Custom CLI commands and POST endpoints to evaluate environment sustainability score thresholds in CI/CD deployment workflows.
-
----
-
-## 🏗️ Architecture Stack
-
-*   **Frontend**: React (TypeScript) + Vite + TailwindCSS + Recharts + Framer Motion.
-*   **Backend**: FastAPI (Python) + Uvicorn + SQLAlchemy.
-*   **Database**: PostgreSQL (Production) / SQLite `data/hydrawatch.db` (Local Fallback).
-*   **Containerization**: Multi-stage `Dockerfile` (React build + Python serve) and `docker-compose.yml`.
+*   **🌍 Interactive 3D Globe**: Visually trace live grid carbon scores, regional water scarcity indices, and power-grid emissions directly on a dynamic Canvas sphere.
+*   **📊 Personal AI Use Estimator**: Compute direct/indirect water cooling consumption (L), energy draw (Wh), and carbon footprint (g CO₂e) per query. Translate calculations to LED lightbulb hours, gas car distance driven, and running tap seconds.
+*   **🔄 Side-by-Side A/B Comparison**: Evaluate and contrast different model configurations, daily query traffic, or datacenter locations with dynamic comparison chart tooltips and percentage delta counters.
+*   **🔌 Automated Fallback Database**: Persisted geocoding caching and shared estimation configuration states via SQLAlchemy, defaulting to a local SQLite database and scaling to PostgreSQL in production environments.
+*   **🛡️ Production-Grade Middleware**: Client-side IP sliding-window rate limiting (100 requests/minute) protecting backend endpoints from automated query loops.
+*   **🤖 CI/CD Sustainability Gates**: Integrate deployment gates checking threshold criteria in release processes using custom scripts and CLI rules.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
-### 1. Local Development (SQLite Database)
+### 1. Local Development (SQLite)
 
-Ensure Python 3.9+ and Node.js 18+ are installed.
+Ensure Python 3.9+ and Node.js 18+ are configured locally.
 
-#### Start the Backend Server:
+#### Start Backend API
 ```bash
 # Install dependencies
 pip3 install -r requirements.txt
 
-# Run the Uvicorn application (defaults to SQLite data/hydrawatch.db)
+# Start local FastAPI web server
 uvicorn api.main:app --reload --port 8080
 ```
-*   API Docs will be available at: **`http://localhost:8080/docs`**
+> [!NOTE]
+> On startup, HydraWatch checks for a `DATABASE_URL` env variable. If not found, it automatically initializes and seeds tables in a local SQLite file: `data/hydrawatch.db`.
 
-#### Start the Frontend Web App:
+#### Start Frontend UI
 ```bash
 cd frontend
 
-# Install packages
+# Install node dependencies
 npm install
 
-# Start Vite dev server with Hot Module Replacement (HMR)
+# Launch Vite dev server with Hot Module Replacement (HMR)
 npm run dev
 ```
-*   Vite dev server runs at: **`http://localhost:5173`** (automatically proxies `/api` calls to port `8080`).
+*   Dev server running at: **`http://localhost:5173`** (proxies `/api` queries to port `8080` backend).
 
 ---
 
-### 2. Running the Production Build Locally
-To verify the final compiled bundles exactly as they are served in production:
+### 2. Standalone Production Mode
+Serve the compiled React static files directly from the FastAPI server:
 
 ```bash
-# 1. Compile frontend assets into static files
+# 1. Compile frontend distribution files
 npm --prefix frontend run build
 
-# 2. Start Uvicorn backend (FastAPI mounts and serves static files from frontend/dist)
+# 2. Run backend (FastAPI serves static app files from frontend/dist)
 uvicorn api.main:app --port 8080
 ```
-*   Visit: **`http://localhost:8080`**
+*   Access the standalone portal at: **`http://localhost:8080`**
 
 ---
 
-### 3. Running with Docker Compose
-Launches the web application container linked to a dedicated PostgreSQL database container with mapped data volumes.
+## 🐳 Docker Orchestration
+
+Launch the fully containerized application mapped to a PostgreSQL persistent volume in a single command:
 
 ```bash
-# Build images and run services
 docker compose up --build
 ```
-*   Web server runs on: **`http://localhost:8080`**
-*   PostgreSQL service runs internally on port `5432` with automatic credentials mapping.
+*   Web application running at: **`http://localhost:8080`**
+*   PostgreSQL running internally on port `5432` with shared docker volume persistence.
 
 ---
 
-## 🛠️ Configuration & Environment Variables
+## ⚙️ Configuration Variables
 
-Create a `.env` file in the root directory or declare variables directly in your deployment provider:
+Add variables in your local `.env` file or cloud configuration panel:
 
-| Variable | Description | Default / Fallback |
+| Environment Variable | Description | Fallback Default |
 | :--- | :--- | :--- |
-| `DATABASE_URL` | SQLAlchemy connection string (PostgreSQL or connection string) | SQLite (`sqlite:///data/hydrawatch.db`) |
-| `GOOGLE_MAPS_API_KEY` | Optional key to query Google Geocoding services | Nominatim OpenStreetMap API |
-| `ELECTRICITY_MAPS_API_KEY` | Optional key to query live grid carbon intensity APIs | Static regional grid patterns |
-| `CORS_ALLOWED_ORIGINS` | Comma-separated list of browser origins permitted to query the API | `*` (All) |
-| `LOG_LEVEL` | Level of logging output (`DEBUG`, `INFO`, `WARNING`, `ERROR`) | `INFO` |
+| `DATABASE_URL` | SQLAlchemy connection string (e.g. `postgresql://...`) | `sqlite:///data/hydrawatch.db` |
+| `GOOGLE_MAPS_API_KEY` | Optional. Key to resolve geocoding coordinates. | Fallback to OpenStreetMap Nominatim |
+| `ELECTRICITY_MAPS_API_KEY` | Optional. Key to query live regional grid carbon metrics. | Fallback to static grid models (2023) |
+| `CORS_ALLOWED_ORIGINS` | Permitted origins for REST queries (comma-separated list). | `*` (All origins allowed) |
+| `LOG_LEVEL` | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`). | `INFO` |
 
 ---
 
-## 📈 REST API Reference
+## 🛠️ Developer APIs & CLI
 
-| Endpoint | Method | Description |
-| :--- | :--- | :--- |
-| `/api` | `GET` | Health check, services, version info. |
-| `/api/meta` | `GET` | Retrieve allowed providers, scenarios, GPUs, and models. |
-| `/api/regions` | `GET` | List data center metrics (optionally filter by `?provider=AWS`). |
-| `/api/regions/map` | `GET` | Fetch coordinates, carbon metrics, and scores for globe rendering. |
-| `/api/geocode?q={query}` | `GET` | Geocoding resolution (cached in database). |
-| `/api/analyze` | `POST` | Core sustainability footprint analyzer for multi-cloud alternatives. |
-| `/api/estimates` | `POST` | Save a specific Personal Estimator configuration. Returns a unique short ID. |
-| `/api/estimates/{id}` | `GET` | Retrieve a saved personal estimator state configuration. |
-| `/sitemap.xml` | `GET` | Dynamic XML sitemap containing all site views and shared database URLs. |
-| `/api/gate` | `POST` | Sustainability evaluation gateway for CI/CD gates. |
+<details>
+<summary><b>📖 Click to expand REST API Endpoints</b></summary>
 
----
+| Route | Method | Payload / Params | Response Description |
+| :--- | :--- | :--- | :--- |
+| `/api` | `GET` | None | API health status, version index, and provider lists. |
+| `/api/meta` | `GET` | None | Lists configurations (models, scenario guidelines, and GPU specs). |
+| `/api/regions` | `GET` | `?provider=AWS` (optional) | Returns cloud datacenters with sustainability stress stats. |
+| `/api/regions/map` | `GET` | None | Map points for globe positioning with scores and carbon bands. |
+| `/api/geocode` | `GET` | `?q=Mumbai` | Geocoding lookup coordinates (cached in database). |
+| `/api/analyze` | `POST` | `AnalyzeRequest` (JSON) | Footprint computation for multi-cloud alternatives. |
+| `/api/estimates` | `POST` | Config state (JSON) | Saves estimator configuration. Returns a short UUID token. |
+| `/api/estimates/{id}` | `GET` | Estimate ID (path) | Retrieves a saved estimator state. |
+| `/sitemap.xml` | `GET` | None | Dynamic XML sitemap linking all pages and shared estimates. |
+| `/api/gate` | `POST` | Deployment threshold | CI/CD sustainability gating validator. |
 
-## 🤖 Command Line Interface (CLI)
+</details>
 
-Evaluate sustainability targets directly in your build shell:
+<details>
+<summary><b>💻 Click to expand CLI Commands</b></summary>
+
+Execute sustainability queries directly inside terminal environments:
 
 ```bash
-# 1. Run local sustainability gate check
+# 1. CI/CD Gating Validation (fails build if threshold scoring not met)
 python3 run.py gate --region eu-north-1 --min-score 50
 
-# 2. View specific regional footprint calculations
-python3 run.py analyze --region ap-south-1 --qps 100
+# 2. Workload Footprint Analysis
+python3 run.py analyze --region ap-south-1 --qps 120 --avg-tokens 1000
 
-# 3. Output structural validation stats
+# 3. Model Accuracy Data Validation
 python3 run.py validate-all
 ```
 
+</details>
+
 ---
 
-## ☁️ Production Deployment (e.g., Render)
+## ☁️ Deployment Guide (Render)
 
-To launch the application globally using [Render](https://render.com):
+To host your app globally with auto-synchronized database tables:
 
-1.  Log in to Render and create a new **PostgreSQL Database** resource. Copy its **Internal Database URL**.
-2.  Click **New > Web Service** and connect your GitHub repository.
-3.  Set the following configuration:
+1.  Create a **PostgreSQL Database** on Render. Copy the **Internal Database URL**.
+2.  Create a new **Web Service** on Render and connect your repository (`Gillcharu/HYDRA-WATCH`).
+3.  Set the following properties:
     *   **Runtime**: `Docker`
-    *   **Dockerfile Path**: `Dockerfile` (root folder)
-4.  Add the **Environment Variables**:
-    *   `DATABASE_URL` = (Paste your Render PostgreSQL connection string)
-    *   `GOOGLE_MAPS_API_KEY` = (Your API key, optional)
-    *   `ELECTRICITY_MAPS_API_KEY` = (Your API key, optional)
-5.  Click **Deploy Web Service**. Render will build the container, start the database engine, and provision a public HTTPS URL.
+    *   **Dockerfile Path**: `Dockerfile` (default)
+4.  Add the environment variables in your environment panel:
+    *   `DATABASE_URL` = (Paste your PostgreSQL connection string)
+5.  Click **Deploy Web Service**. Render compiles the frontend, initializes database schemas, and deploys to a public HTTPS url (e.g. `https://hydrawatch.onrender.com`).
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
