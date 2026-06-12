@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useEffect, useState } from "react";
 import { FadeIn } from "../components/AnimatedCounter";
 import { TierBadge } from "../components/ScoreRing";
 import { api } from "../lib/api";
@@ -8,7 +7,7 @@ import type { ValidationSummary } from "../types";
 const TIERS = [
   { id: "V0", label: "Modeled", desc: "TDP heuristics, static grid factors", color: "from-slate-500 to-slate-600" },
   { id: "V1", label: "Published", desc: "IEA national + eGRID state carbon bands", color: "from-amber-600 to-orange-600" },
-  { id: "V2", label: "Benchmarked", desc: "MLPerf measured power & throughput", color: "from-violet-600 to-purple-600" },
+  { id: "V2", label: "Benchmarked", desc: "MLPerf measured power & throughput", color: "from-teal-600 to-cyan-600" },
   { id: "V3", label: "Live", desc: "Electricity Maps, CloudWatch telemetry", color: "from-cyan-600 to-blue-600" },
   { id: "V4", label: "Metered", desc: "CCFT / GCP carbon export ground truth", color: "from-emerald-600 to-teal-600" },
 ];

@@ -141,7 +141,7 @@ export function LeaderboardPage() {
                 <tbody>
                   {board.map((b) => (
                     <tr key={b.region_code} className="border-b border-slate-100 hover:bg-slate-50/50">
-                      <td className="px-4 py-3 font-display font-bold text-indigo-600">{b.rank}</td>
+                      <td className="px-4 py-3 font-display font-bold text-teal-600">{b.rank}</td>
                       <td className="px-4 py-3">
                         <div className="font-medium text-slate-900">
                           {formatRegionDisplayName(b.region_code, b.region_name, b.country)}

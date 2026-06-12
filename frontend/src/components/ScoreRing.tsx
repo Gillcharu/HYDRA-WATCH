@@ -50,7 +50,7 @@ export function TierBadge({ tier }: { tier: string }) {
   const colors: Record<string, string> = {
     V4: "from-emerald-600 to-teal-700",
     V3: "from-cyan-600 to-blue-700",
-    V2: "from-violet-600 to-purple-700",
+    V2: "from-teal-600 to-cyan-700",
     V1: "from-amber-600 to-orange-700",
     V0: "from-slate-500 to-slate-600",
   };

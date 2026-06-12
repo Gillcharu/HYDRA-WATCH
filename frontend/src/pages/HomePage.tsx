@@ -62,8 +62,8 @@ export function HomePage() {
           <FadeIn>
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-4 py-1.5">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-indigo-600" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-600" />
               </span>
               <span className="font-mono text-xs font-semibold text-slate-600">Live · 121 regions validated</span>
             </div>
@@ -72,7 +72,7 @@ export function HomePage() {
           <FadeIn>
             <h1 className="headline mt-8 max-w-4xl text-slate-900">
               Deploy AI where the{" "}
-              <span className="text-indigo-600">
+              <span className="text-teal-600">
                 planet
               </span>{" "}
               can sustain it
@@ -123,7 +123,7 @@ export function HomePage() {
           <FadeIn>
             <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
               <div>
-                <span className="rounded-full bg-indigo-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-600">
+                <span className="rounded-full bg-teal-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-teal-600">
                   For Individuals
                 </span>
                 <h2 className="mt-3 font-display text-2xl font-bold text-slate-900">

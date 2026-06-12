@@ -128,7 +128,7 @@ const CustomTooltip = ({ active, payload }: any) => {
         <p className="font-bold text-white mb-1">{data.name} Footprint</p>
         <div className="space-y-0.5 font-mono">
           <p className="text-cyan-300">Config A: {payload[0].value} {data.unit}</p>
-          <p className="text-purple-300">Config B: {payload[1].value} {data.unit}</p>
+          <p className="text-emerald-400">Config B: {payload[1].value} {data.unit}</p>
         </div>
       </div>
     );
@@ -599,7 +599,7 @@ export function PersonalEstimatorPage() {
   if (loadingEstimate) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-32 sm:px-6 flex flex-col items-center justify-center min-h-[50vh]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-teal-600 border-t-transparent" />
         <p className="mt-4 text-sm text-slate-500 font-mono">Loading shared estimate...</p>
       </div>
     );
@@ -625,8 +625,8 @@ export function PersonalEstimatorPage() {
       <FadeIn>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5">
-              <span className="font-mono text-xs font-medium text-indigo-600">
+            <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-4 py-1.5">
+              <span className="font-mono text-xs font-medium text-teal-600">
                 For Individuals
               </span>
             </div>
@@ -669,13 +669,13 @@ export function PersonalEstimatorPage() {
         <div className={compareMode ? "lg:col-span-12 grid gap-6 md:grid-cols-2" : "lg:col-span-5"}>
           {/* CONFIGURATION A */}
           <FadeIn delay={0.1}>
-            <div className={`glass rounded-2xl p-6 md:p-8 h-full bg-white border border-slate-200 shadow-sm transition-all ${compareMode ? "border-indigo-300 ring-1 ring-indigo-100" : ""}`}>
+            <div className={`glass rounded-2xl p-6 md:p-8 h-full bg-white border border-slate-200 shadow-sm transition-all ${compareMode ? "border-teal-300 ring-1 ring-teal-100" : ""}`}>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-display text-lg font-bold text-slate-900">
                   {compareMode ? "Configuration A" : "Estimate Settings"}
                 </h2>
                 {compareMode && (
-                  <span className="h-2.5 w-2.5 rounded-full bg-indigo-500 animate-pulse" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-teal-500 animate-pulse" />
                 )}
               </div>
 
@@ -747,7 +747,7 @@ export function PersonalEstimatorPage() {
                     className="input-dark pr-10"
                   />
                   {loadingLocA && (
-                    <div className="absolute right-3 top-3 h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+                    <div className="absolute right-3 top-3 h-4 w-4 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
                   )}
                   {locationCoords && !locQueryA && (
                     <button
@@ -785,7 +785,7 @@ export function PersonalEstimatorPage() {
                   </div>
                 )}
                 {locationCoords && (
-                  <div className="mt-2 text-[10px] text-indigo-600 font-mono flex items-center gap-1.5">
+                  <div className="mt-2 text-[10px] text-teal-600 font-mono flex items-center gap-1.5">
                     <span>Mapped: {locationCoords.name} ({locationCoords.lat.toFixed(2)}, {locationCoords.lon.toFixed(2)})</span>
                   </div>
                 )}
@@ -798,7 +798,7 @@ export function PersonalEstimatorPage() {
                     Daily AI Prompts
                     <Tooltip text="Adjust the slider to scale your daily prompt queries to a cumulative monthly footprint." />
                   </label>
-                  <span className="font-mono text-xs font-bold text-indigo-600">
+                  <span className="font-mono text-xs font-bold text-teal-600">
                     {usage} prompts / day
                   </span>
                 </div>
@@ -809,7 +809,7 @@ export function PersonalEstimatorPage() {
                   max="150"
                   value={usage}
                   onChange={(e) => setUsage(Number(e.target.value))}
-                  className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-indigo-600 focus:outline-none"
+                  className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-teal-600 focus:outline-none"
                 />
               </div>
             </div>
@@ -825,10 +825,10 @@ export function PersonalEstimatorPage() {
                 transition={{ duration: 0.25 }}
                 className="h-full"
               >
-                <div className="glass bg-white border border-slate-200 shadow-sm border-purple-300 ring-1 ring-purple-100 rounded-2xl p-6 md:p-8 h-full">
+                <div className="glass bg-white border border-slate-200 shadow-sm border-emerald-300 ring-1 ring-emerald-100 rounded-2xl p-6 md:p-8 h-full">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="font-display text-lg font-bold text-slate-900">Configuration B</h2>
-                    <span className="h-2.5 w-2.5 rounded-full bg-purple-500 animate-pulse" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
 
                   {/* AI Tool */}
@@ -899,7 +899,7 @@ export function PersonalEstimatorPage() {
                         className="input-dark pr-10"
                       />
                       {loadingLocB && (
-                        <div className="absolute right-3 top-3 h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+                        <div className="absolute right-3 top-3 h-4 w-4 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
                       )}
                       {locationCoordsB && !locQueryB && (
                         <button
@@ -937,7 +937,7 @@ export function PersonalEstimatorPage() {
                       </div>
                     )}
                     {locationCoordsB && (
-                      <div className="mt-2 text-[10px] text-purple-600 font-mono flex items-center gap-1.5">
+                      <div className="mt-2 text-[10px] text-emerald-600 font-mono flex items-center gap-1.5">
                         <span>Mapped: {locationCoordsB.name} ({locationCoordsB.lat.toFixed(2)}, {locationCoordsB.lon.toFixed(2)})</span>
                       </div>
                     )}
@@ -950,7 +950,7 @@ export function PersonalEstimatorPage() {
                         Daily AI Prompts
                         <Tooltip text="Adjust the slider to scale your daily prompt queries to a cumulative monthly footprint." />
                       </label>
-                      <span className="font-mono text-xs font-bold text-purple-600">
+                      <span className="font-mono text-xs font-bold text-emerald-600">
                         {usageB} prompts / day
                       </span>
                     </div>
@@ -961,7 +961,7 @@ export function PersonalEstimatorPage() {
                       max="150"
                       value={usageB}
                       onChange={(e) => setUsageB(Number(e.target.value))}
-                      className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-purple-600 focus:outline-none"
+                      className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-emerald-600 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -982,8 +982,8 @@ export function PersonalEstimatorPage() {
                   {/* CONFIG A (AND REGULAR MODE) DISPLAY */}
                   <div className={`space-y-4 ${compareMode ? "border-r border-slate-200 pr-6" : ""}`}>
                     {compareMode && (
-                      <div className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse" /> Config A ({aiTool})
+                      <div className="text-xs font-bold text-teal-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full bg-teal-600 animate-pulse" /> Config A ({aiTool})
                       </div>
                     )}
                     <div className={`grid gap-3 ${compareMode ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-3"}`}>
@@ -1011,7 +1011,7 @@ export function PersonalEstimatorPage() {
 
                       {/* Energy */}
                       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 flex flex-col justify-between">
-                        <div className="text-xs font-semibold text-indigo-700 flex items-center">
+                        <div className="text-xs font-semibold text-teal-700 flex items-center">
                           Energy per query
                           <Tooltip text="Total electricity (Wh) consumed by the GPU server hardware, including datacenter PUE (overhead cooling/lighting factors)." />
                         </div>
@@ -1046,8 +1046,8 @@ export function PersonalEstimatorPage() {
                   {/* CONFIG B DISPLAY (Visible only in compareMode) */}
                   {compareMode && (
                     <div className="space-y-4 pl-2">
-                      <div className="text-xs font-bold text-purple-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-purple-600 animate-pulse" /> Config B ({aiToolB})
+                      <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full bg-emerald-600 animate-pulse" /> Config B ({aiToolB})
                       </div>
                       <div className="grid gap-3 grid-cols-1">
                         {/* Water */}
@@ -1074,7 +1074,7 @@ export function PersonalEstimatorPage() {
 
                         {/* Energy */}
                         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 flex flex-col justify-between">
-                          <div className="text-xs font-semibold text-indigo-700 flex items-center">
+                          <div className="text-xs font-semibold text-emerald-700 flex items-center">
                             Energy per query
                             <Tooltip text="Total electricity (Wh) consumed by the GPU server hardware, including datacenter PUE (overhead cooling/lighting factors)." />
                           </div>
@@ -1145,8 +1145,8 @@ export function PersonalEstimatorPage() {
                           <XAxis dataKey="name" stroke="#64748b" fontSize={9} tickLine={false} />
                           <YAxis stroke="#64748b" fontSize={9} tickLine={false} />
                           <RechartsTooltip content={<CustomTooltip />} />
-                          <Bar dataKey="A" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="B" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="A" fill="#0d9488" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="B" fill="#059669" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -1162,7 +1162,7 @@ export function PersonalEstimatorPage() {
                     {/* Monthly Config A */}
                     <div className="space-y-3">
                       {compareMode && (
-                        <div className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest border-b border-slate-200 pb-1">
+                        <div className="text-[10px] font-bold text-teal-600 uppercase tracking-widest border-b border-slate-200 pb-1">
                           Config A Monthly
                         </div>
                       )}
@@ -1185,7 +1185,7 @@ export function PersonalEstimatorPage() {
                     {/* Monthly Config B */}
                     {compareMode && (
                       <div className="space-y-3">
-                        <div className="text-[10px] font-bold text-purple-600 uppercase tracking-widest border-b border-slate-200 pb-1">
+                        <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest border-b border-slate-200 pb-1">
                           Config B Monthly
                         </div>
                         <div className="flex flex-col gap-2">
@@ -1238,7 +1238,7 @@ export function PersonalEstimatorPage() {
                   <span className="font-semibold text-slate-700 block mb-1">Citations &amp; Reference Sources:</span>
                   <ul className="list-disc list-inside space-y-1 text-[11px]">
                     <li>
-                      <a href="https://arxiv.org/abs/2304.03271" target="_blank" rel="noreferrer" className="hover:text-indigo-600 underline">
+                      <a href="https://arxiv.org/abs/2304.03271" target="_blank" rel="noreferrer" className="hover:text-teal-600 underline">
                         Making AI Less &ldquo;Thirsty&rdquo;: Islam et al.
                       </a>
                     </li>

@@ -13,7 +13,7 @@
     font-variant-numeric: tabular-nums;
   }
   ::selection {
-    @apply bg-indigo-100 text-indigo-900;
+    @apply bg-teal-100 text-teal-900;
   }
 }
 
@@ -31,7 +31,7 @@
     @apply inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50;
   }
   .section-label {
-    @apply font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-600;
+    @apply font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-600;
   }
   .headline {
     @apply font-display text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl;
@@ -40,7 +40,7 @@
     @apply glass relative overflow-hidden rounded-2xl p-6 transition duration-200 hover:border-slate-300 hover:shadow-md;
   }
   .input-dark {
-    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/30;
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500/30;
   }
   .label-dark {
     @apply mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-500;

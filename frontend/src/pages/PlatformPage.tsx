@@ -232,7 +232,7 @@ export function PlatformPage() {
                     : "hover:border-slate-300 border-slate-200 bg-white"
                 }`}
               >
-                <div className={`text-xs font-semibold uppercase tracking-wide ${activeWorkload === workload.id ? "text-indigo-600" : "text-slate-500"}`}>{workload.source}</div>
+                <div className={`text-xs font-semibold uppercase tracking-wide ${activeWorkload === workload.id ? "text-teal-600" : "text-slate-500"}`}>{workload.source}</div>
                 <div className={`mt-2 font-semibold ${activeWorkload === workload.id ? "text-slate-900" : "text-slate-700"}`}>{workload.name}</div>
                 <div className="mt-1 text-xs text-slate-500">{workload.owner}</div>
                 <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-slate-500">
@@ -372,7 +372,7 @@ export function PlatformPage() {
                     <input
                       id="live-telemetry"
                       type="checkbox"
-                      className="h-4 w-4 rounded border-slate-300 bg-white text-indigo-600 focus:ring-indigo-500"
+                      className="h-4 w-4 rounded border-slate-300 bg-white text-teal-600 focus:ring-teal-500"
                       checked={liveTelemetry}
                       onChange={(e) => setLiveTelemetry(e.target.checked)}
                     />
@@ -467,7 +467,7 @@ export function PlatformPage() {
                         <div className="space-y-1">
                           <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Recommended Action</div>
                           <h3 className="font-display text-base font-semibold text-slate-900 sm:text-lg">
-                            Recommended action: Move <span className="text-indigo-600 font-extrabold">{DETECTED_WORKLOADS.find(w => w.id === activeWorkload)?.name || "your workload"}</span> from{" "}
+                            Recommended action: Move <span className="text-teal-600 font-extrabold">{DETECTED_WORKLOADS.find(w => w.id === activeWorkload)?.name || "your workload"}</span> from{" "}
                             <span className="text-slate-700 font-bold">
                               {(() => {
                                 const reg = regions.find(r => r.region_code === result.current.region_code);
@@ -505,7 +505,7 @@ export function PlatformPage() {
                         <p className="mt-1 text-slate-600">
                           {result.current.provider} · {result.current.score_label} · {result.current.latency_ms} ms latency
                         </p>
-                        <p className="mt-2 font-mono text-xs text-indigo-600">
+                        <p className="mt-2 font-mono text-xs text-teal-600">
                           Energy {fp?.energy_tier} · {fp?.energy_basis}
                         </p>
                         {Object.keys(components).length > 0 && (
@@ -518,14 +518,14 @@ export function PlatformPage() {
                         {[
                           { label: "Water / mo", text: fp ? formatWaterRange(fp.water_L_month.low, fp.water_L_month.high) : "—", color: "text-cyan-700" },
                           { label: "Carbon / mo", text: fp ? formatCarbonRange(fp.carbon_kg_month.low, fp.carbon_kg_month.high) : "—", color: "text-amber-700" },
-                          { label: "Cost / mo", text: fp ? `$${fp.cost_usd_month.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—", color: "text-indigo-600" },
+                          { label: "Cost / mo", text: fp ? `$${fp.cost_usd_month.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—", color: "text-slate-800" },
                         ].map((m) => (
                           <div key={m.label} className="border-slate-200 p-4 text-center [&:not(:last-child)]:border-r">
                             <div className={`font-display text-xl font-bold ${m.color}`}>
                               {m.text}
                             </div>
                             <div className="mt-1 text-[10px] uppercase tracking-wider text-slate-500">
-                              {m.label} <Link to="/trust" className="text-indigo-600 hover:underline font-bold text-[9px] relative -top-0.5">†</Link>
+                              {m.label} <Link to="/trust" className="text-teal-600 hover:underline font-bold text-[9px] relative -top-0.5">†</Link>
                             </div>
                           </div>
                         ))}
@@ -542,7 +542,7 @@ export function PlatformPage() {
                       <div>
                         <div className="flex items-center justify-between mb-3 border-b border-slate-200 pb-1.5">
                           <h3 className="font-display text-xs font-semibold text-slate-500 uppercase tracking-wider">Lifecycle Carbon &amp; Offsets</h3>
-                          <Link to="/trust" className="text-xs text-indigo-600 hover:underline">Methodology ↗</Link>
+                          <Link to="/trust" className="text-xs text-teal-600 hover:underline">Methodology ↗</Link>
                         </div>
                         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
                           <div className="glass rounded-xl p-4 text-left bg-white border border-slate-200 shadow-sm">
@@ -579,7 +579,7 @@ export function PlatformPage() {
                       <div>
                         <div className="flex items-center justify-between mb-3 border-b border-slate-200 pb-1.5">
                           <h3 className="font-display text-xs font-semibold text-slate-500 uppercase tracking-wider">Lifecycle Water Footprint</h3>
-                          <Link to="/trust" className="text-xs text-indigo-600 hover:underline">Methodology ↗</Link>
+                          <Link to="/trust" className="text-xs text-teal-600 hover:underline">Methodology ↗</Link>
                         </div>
                         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
                           <div className="glass rounded-xl p-4 text-left bg-white border border-slate-200 shadow-sm">
@@ -620,7 +620,7 @@ export function PlatformPage() {
                     <div className="glass rounded-2xl p-6 bg-white border border-slate-200 shadow-sm">
                       <div className="flex items-center justify-between mb-4 pb-1.5 border-b border-slate-200">
                         <h3 className="font-display font-bold text-slate-900">Footprint breakdown</h3>
-                        <Link to="/trust" className="text-xs text-indigo-600 hover:underline">Methodology ↗</Link>
+                        <Link to="/trust" className="text-xs text-teal-600 hover:underline">Methodology ↗</Link>
                       </div>
                       <div className="mt-4">
                         <FootprintBars water={fp.water_L_month.mid} carbon={fp.carbon_kg_month.mid} cost={fp.cost_usd_month} />
@@ -773,11 +773,11 @@ jobs:
           <button
             type="button"
             onClick={() => setRefOpen(!refOpen)}
-            className="flex w-full items-center justify-between border-t border-slate-200 pt-6 text-left transition hover:text-indigo-600"
+            className="flex w-full items-center justify-between border-t border-slate-200 pt-6 text-left transition hover:text-teal-600"
           >
             <div>
               <h3 className="font-display text-lg font-bold text-slate-900 flex items-center gap-2">
-                <svg className="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
                 Sourcing &amp; References Atlas
@@ -847,7 +847,7 @@ jobs:
 
                   <div className="glass rounded-xl p-5 bg-white border border-slate-200 shadow-sm">
                     <h4 className="font-display font-bold text-slate-900 text-sm flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
                       Semiconductor Embodied Lifecycle (Scope 3)
                     </h4>
                     <p className="mt-2 text-xs text-slate-600 leading-relaxed">

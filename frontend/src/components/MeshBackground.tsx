@@ -6,11 +6,11 @@ export function MeshBackground() {
       <div className="absolute inset-0 bg-slate-50" />
       <div className="absolute inset-0 bg-grid-pattern bg-grid opacity-60" />
       <motion.div
-        className="absolute -left-1/4 -top-1/4 h-[70vh] w-[70vh] rounded-full bg-indigo-200/30 blur-[120px] animate-mesh-drift"
+        className="absolute -left-1/4 -top-1/4 h-[70vh] w-[70vh] rounded-full bg-teal-100/25 blur-[120px] animate-mesh-drift"
         aria-hidden
       />
       <motion.div
-        className="absolute -bottom-1/4 -right-1/4 h-[60vh] w-[60vh] rounded-full bg-cyan-100/35 blur-[100px] animate-mesh-drift"
+        className="absolute -bottom-1/4 -right-1/4 h-[60vh] w-[60vh] rounded-full bg-emerald-50/30 blur-[100px] animate-mesh-drift"
         style={{ animationDelay: "-6s" }}
         aria-hidden
       />
