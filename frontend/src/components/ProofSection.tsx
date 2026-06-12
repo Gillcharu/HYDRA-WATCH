@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { FadeIn } from "./AnimatedCounter";
 import { ScoreRing, TierBadge } from "./ScoreRing";
 import { api } from "../lib/api";
@@ -16,7 +15,7 @@ export function ProofSection() {
   if (!cs) {
     return (
       <section id="proof" className="px-4 py-20 sm:px-6">
-        <div className="mx-auto max-w-7xl animate-pulse rounded-2xl bg-white/5 h-96" />
+        <div className="mx-auto max-w-7xl animate-pulse rounded-xl bg-white/5 h-96" />
       </section>
     );
   }
@@ -41,8 +40,11 @@ export function ProofSection() {
               </p>
             </div>
             {cs.pass && (
-              <span className="rounded-full border border-teal-200 bg-teal-50 px-4 py-2 font-mono text-xs font-bold text-teal-700">
-                ✓ REPRODUCIBLE
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 font-mono text-[10px] font-bold text-teal-700">
+                <svg className="h-4 w-4 shrink-0 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                REPRODUCIBLE
               </span>
             )}
           </div>
@@ -51,10 +53,10 @@ export function ProofSection() {
         <div className="mt-12 grid gap-6 lg:grid-cols-2">
           {/* Mumbai */}
           <FadeIn>
-            <div className="glass relative overflow-hidden rounded-2xl p-8 bg-white border border-slate-200 shadow-sm">
+            <div className="glass relative overflow-hidden rounded-xl p-8 bg-white border border-slate-200 shadow-sm">
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="text-sm font-semibold text-red-600">Current deployment</div>
+                  <div className="text-sm font-semibold text-red-650">Current deployment</div>
                   <h3 className="mt-1 font-display text-xl font-bold text-slate-900">ap-south-1 · Mumbai, India</h3>
                   <div className="mt-1 font-mono text-xs text-slate-500">AWS</div>
                 </div>
@@ -83,7 +85,7 @@ export function ProofSection() {
 
           {/* Stockholm */}
           <FadeIn>
-            <div className="glass relative overflow-hidden rounded-2xl p-8 bg-white border border-teal-200 shadow-sm">
+            <div className="glass relative overflow-hidden rounded-xl p-8 bg-white border border-teal-200 shadow-sm">
               <div className="absolute left-4 top-4 rounded-full bg-teal-50 border border-teal-200/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-teal-700">
                 Recommended
               </div>
@@ -118,10 +120,10 @@ export function ProofSection() {
         </div>
 
         <FadeIn>
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-100/50 p-6">
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-100/50 p-6">
             <p className="text-sm text-slate-600">{cs.conclusion}</p>
-            <Link to="/platform" className="btn-glow shrink-0 !py-2.5 !text-xs">
-              Run your own analysis →
+            <Link to="/platform" className="btn-glow shrink-0">
+              Evaluate workload
             </Link>
           </div>
         </FadeIn>

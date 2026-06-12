@@ -70,28 +70,24 @@ export function HomePage() {
           </FadeIn>
 
           <FadeIn>
-            <h1 className="headline mt-8 max-w-4xl text-slate-900">
-              Deploy AI where the{" "}
-              <span className="text-teal-600">
-                planet
-              </span>{" "}
-              can sustain it
+            <h1 className="headline mt-8 max-w-4xl text-slate-950">
+              Deploy machine learning where the <span className="font-display italic text-teal-700 font-normal">planet</span> can sustain it.
             </h1>
           </FadeIn>
 
           <FadeIn>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
-              Pick a model and region. See how much water and carbon your workload uses, then find greener alternatives within your latency budget.
+            <p className="mt-6 max-w-2xl text-[17px] leading-[1.8] text-slate-600 font-sans">
+              An open decision-support engine mapping the ecological boundaries of AI computing. Quantify operational water stress and grid carbon intensity across cloud regions to optimize workload placement.
             </p>
           </FadeIn>
 
           <FadeIn delay={0.3}>
             <div className="mt-10 flex flex-wrap gap-4">
               <Link to="/platform" className="btn-glow">
-              Connect workload source →
+                Evaluate Workload
               </Link>
               <a href="#proof" className="btn-ghost">
-                See the proof
+                Read methodology
               </a>
             </div>
           </FadeIn>
@@ -105,7 +101,7 @@ export function HomePage() {
                 { label: "Data checks passing", value: stats.passRate, suffix: "%" },
                 { label: "User locations", value: 40, suffix: "+" },
               ].map((s) => (
-                <div key={s.label} className="glass rounded-2xl p-5">
+                <div key={s.label} className="glass rounded-xl p-5">
                   <div className="font-display text-3xl font-bold text-slate-900">
                     <AnimatedCounter value={s.value} suffix={s.suffix ?? ""} />
                   </div>
@@ -121,20 +117,20 @@ export function HomePage() {
       <section className="px-4 pb-12 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <FadeIn>
-            <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+            <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
               <div>
-                <span className="rounded-full bg-teal-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-teal-600">
-                  For Individuals
+                <span className="rounded-full bg-teal-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-teal-700">
+                  Carbon Accounting
                 </span>
                 <h2 className="mt-3 font-display text-2xl font-bold text-slate-900">
-                  Estimate the footprint of one AI search
+                  Estimate the footprint of single LLM queries
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm text-slate-600">
-                  Estimate the water, energy, and carbon consumed by a single query across ChatGPT, Gemini, Claude, or Copilot.
+                  Model the water withdrawal, electricity draw, and localized grid carbon intensity of a single query across major public foundation models.
                 </p>
               </div>
               <Link to="/personal-estimator" className="btn-glow shrink-0">
-                Check one AI query →
+                Run single-query model
               </Link>
             </div>
           </FadeIn>

@@ -94,8 +94,11 @@ export function TrustPage() {
               </div>
 
               {failed.length === 0 ? (
-                <div className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 text-center text-sm text-emerald-800">
-                  ✓ All {data.total} regions within published IEA + eGRID carbon bands
+                <div className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50/55 p-4 flex items-center justify-center gap-2 text-sm text-emerald-800 font-medium">
+                  <svg className="h-5 w-5 shrink-0 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>All {data.total} regions within published IEA + eGRID carbon bands</span>
                 </div>
               ) : (
                 <div className="mt-8 overflow-x-auto rounded-xl border border-slate-200">

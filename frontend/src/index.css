@@ -7,7 +7,7 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-slate-50 font-sans text-slate-800 antialiased;
+    @apply bg-[#fbfbf9] font-sans text-slate-800 antialiased;
     font-size: 16px;
     line-height: 1.7;
     font-variant-numeric: tabular-nums;
@@ -19,31 +19,31 @@
 
 @layer components {
   .glass {
-    @apply border border-slate-200 bg-white shadow-sm rounded-2xl;
+    @apply border border-slate-200/80 bg-white/70 backdrop-blur-sm rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)];
   }
   .glass-strong {
-    @apply border border-slate-300 bg-white shadow-md rounded-2xl;
+    @apply border border-slate-300 bg-white shadow-sm rounded-xl;
   }
   .btn-glow {
-    @apply relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 active:scale-[0.98];
+    @apply relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-slate-950 px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-slate-900 active:scale-[0.99] shadow-sm;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50;
+    @apply inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 transition hover:bg-slate-50;
   }
   .section-label {
-    @apply font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-600;
+    @apply font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-teal-700/95;
   }
   .headline {
-    @apply font-display text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl;
+    @apply font-display text-4xl font-medium leading-[1.2] tracking-tight text-slate-950 sm:text-5xl lg:text-[54px];
   }
   .bento-card {
-    @apply glass relative overflow-hidden rounded-2xl p-6 transition duration-200 hover:border-slate-300 hover:shadow-md;
+    @apply glass relative overflow-hidden rounded-xl p-6 transition duration-200 hover:border-slate-300 hover:shadow-sm;
   }
   .input-dark {
-    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500/30;
+    @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500/20 shadow-sm;
   }
   .label-dark {
-    @apply mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-500;
+    @apply mb-1 block font-mono text-[10px] font-medium uppercase tracking-wider text-slate-500;
   }
 }
 

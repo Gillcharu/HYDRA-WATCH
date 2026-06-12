@@ -87,8 +87,9 @@ export function LeaderboardPage() {
             <div className="mt-12 flex items-end justify-center gap-4 sm:gap-8">
               {podiumOrder.map((b, i) => {
                 const rank = b.rank;
-                const heights = ["h-32", "h-44", "h-24"];
-                const medals = ["🥈", "🥇", "🥉"];
+                const heights = ["h-28", "h-36", "h-20"];
+                const rankLabels = ["Rank 02", "Rank 01", "Rank 03"];
+                const labelColors = ["text-slate-500", "text-teal-700", "text-slate-650"];
                 return (
                   <motion.div
                     key={b.region_code}
@@ -97,7 +98,9 @@ export function LeaderboardPage() {
                     transition={{ delay: i * 0.1 }}
                     className={`flex flex-col items-center ${i === 1 ? "order-none" : ""}`}
                   >
-                    <div className="mb-3 text-3xl">{medals[i]}</div>
+                    <div className={`mb-2 font-mono text-[10px] font-bold uppercase tracking-widest ${labelColors[i]}`}>
+                      {rankLabels[i]}
+                    </div>
                     <ScoreRing score={b.sustainability_score} size={i === 1 ? 120 : 90} />
                     <div className="mt-3 max-w-[140px] text-center">
                       <div className="truncate font-semibold text-slate-900 text-xs" title={formatRegionDisplayName(b.region_code, b.region_name, b.country)}>
@@ -105,8 +108,8 @@ export function LeaderboardPage() {
                       </div>
                       <div className="text-[10px] text-slate-500">{b.provider}</div>
                     </div>
-                    <div className={`mt-4 w-24 rounded-t-xl bg-gradient-to-t from-slate-200 to-slate-100 border border-slate-200 ${heights[i]} flex items-end justify-center pb-2`}>
-                      <span className="font-display text-2xl font-bold text-slate-800">#{rank}</span>
+                    <div className={`mt-4 w-24 rounded-t-lg bg-slate-100 border-x border-t border-slate-200 ${heights[i]} flex items-end justify-center pb-2`}>
+                      <span className="font-mono text-lg font-bold text-slate-700">#{rank}</span>
                     </div>
                   </motion.div>
                 );

@@ -23,7 +23,7 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "IBM Plex Sans", "system-ui", "sans-serif"],
-        display: ["Inter", "IBM Plex Sans", "system-ui", "sans-serif"],
+        display: ["Lora", "Inter", "IBM Plex Sans", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       animation: {

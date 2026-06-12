@@ -204,8 +204,10 @@ export function PlatformPage() {
 
         <div className="mt-8">
           <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            <div className="flex items-start gap-2">
-              <span className="mt-0.5 text-base">⚠️</span>
+            <div className="flex items-start gap-2.5">
+              <svg className="h-5 w-5 shrink-0 mt-0.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
               <div>
                 <span className="font-bold">Demo Connection Mode:</span> The cloud telemetry connections below are simulated illustrative examples. Add your active credentials in the <span className="font-semibold">Advanced Override</span> settings below to query real endpoints.
               </div>
