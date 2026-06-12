@@ -41,16 +41,16 @@ export function LeaderboardPage() {
       <div className="mx-auto max-w-7xl">
         <FadeIn>
           <div className="section-label">Rankings</div>
-          <h1 className="font-display text-3xl font-bold text-white sm:text-4xl">Global sustainability leaderboard</h1>
-          <p className="mt-2 text-slate-400">Top regions worldwide within your latency budget — ranked by composite score.</p>
+          <h1 className="font-display text-3xl font-bold text-slate-900 sm:text-4xl">Global sustainability leaderboard</h1>
+          <p className="mt-2 text-slate-600">Top regions worldwide within your latency budget — ranked by composite score.</p>
         </FadeIn>
 
-        <FadeIn delay={0.1}>
+        <FadeIn>
           <div className="mt-8 flex flex-wrap items-end gap-4">
             <div className="min-w-[260px] flex-1">
               <label className="label-dark">User location</label>
               <select className="input-dark" value={location} onChange={(e) => setLocation(e.target.value)}>
-                {locations.map((l) => <option key={l} value={l} className="bg-abyss-900">{l}</option>)}
+                {locations.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
             <button type="button" className="btn-glow" onClick={load} disabled={loading}>
@@ -61,7 +61,7 @@ export function LeaderboardPage() {
 
         {/* Podium */}
         {podiumOrder.length >= 3 && (
-          <FadeIn delay={0.2}>
+          <FadeIn>
             <div className="mt-12 flex items-end justify-center gap-4 sm:gap-8">
               {podiumOrder.map((b, i) => {
                 const rank = b.rank;
@@ -78,11 +78,11 @@ export function LeaderboardPage() {
                     <div className="mb-3 text-3xl">{medals[i]}</div>
                     <ScoreRing score={b.sustainability_score} size={i === 1 ? 120 : 90} />
                     <div className="mt-3 max-w-[140px] text-center">
-                      <div className="truncate font-semibold text-white">{b.region_name}</div>
+                      <div className="truncate font-semibold text-slate-900">{b.region_name}</div>
                       <div className="text-xs text-slate-500">{b.provider}</div>
                     </div>
-                    <div className={`mt-4 w-24 rounded-t-xl bg-gradient-to-t from-aqua-600/40 to-aqua-500/20 ${heights[i]} flex items-end justify-center pb-2`}>
-                      <span className="font-display text-2xl font-bold text-white">#{rank}</span>
+                    <div className={`mt-4 w-24 rounded-t-xl bg-gradient-to-t from-slate-200 to-slate-100 border border-slate-200 ${heights[i]} flex items-end justify-center pb-2`}>
+                      <span className="font-display text-2xl font-bold text-slate-800">#{rank}</span>
                     </div>
                   </motion.div>
                 );
@@ -92,9 +92,9 @@ export function LeaderboardPage() {
         )}
 
         <div className="mt-12 grid gap-8 lg:grid-cols-2">
-          <FadeIn delay={0.25}>
-            <div className="glass rounded-2xl p-6">
-              <h3 className="font-display font-bold text-white">Top 10 scores</h3>
+          <FadeIn>
+            <div className="glass rounded-2xl p-6 bg-white border border-slate-200 shadow-sm">
+              <h3 className="font-display font-bold text-slate-900">Top 10 scores</h3>
               {chartData.length > 0 && (
                 <div className="mt-4">
                   <LeaderboardBars data={chartData} />
@@ -103,27 +103,27 @@ export function LeaderboardPage() {
             </div>
           </FadeIn>
 
-          <FadeIn delay={0.3}>
-            <div className="glass overflow-hidden rounded-2xl">
+          <FadeIn>
+            <div className="glass overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
               <table className="w-full text-sm">
-                <thead className="border-b border-white/5 bg-white/[0.03] text-[11px] uppercase tracking-wider text-slate-500">
+                <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500">
                   <tr>
-                    <th className="px-4 py-3">#</th>
-                    <th className="px-4 py-3">Region</th>
-                    <th className="px-4 py-3">Score</th>
-                    <th className="px-4 py-3">Carbon</th>
+                    <th className="px-4 py-3 text-left">#</th>
+                    <th className="px-4 py-3 text-left">Region</th>
+                    <th className="px-4 py-3 text-left">Score</th>
+                    <th className="px-4 py-3 text-left">Carbon</th>
                   </tr>
                 </thead>
                 <tbody>
                   {board.map((b) => (
-                    <tr key={b.region_code} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
-                      <td className="px-4 py-3 font-display font-bold text-aqua-400">{b.rank}</td>
+                    <tr key={b.region_code} className="border-b border-slate-100 hover:bg-slate-50/50">
+                      <td className="px-4 py-3 font-display font-bold text-indigo-600">{b.rank}</td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-white">{b.region_name}</div>
+                        <div className="font-medium text-slate-900">{b.region_name}</div>
                         <div className="text-xs text-slate-500">{b.provider} · {b.latency_ms}ms</div>
                       </td>
-                      <td className="px-4 py-3 font-bold text-white">{b.sustainability_score}</td>
-                      <td className="px-4 py-3 font-mono text-amber-400/80">{b.carbon_month_kg?.toLocaleString()} kg</td>
+                      <td className="px-4 py-3 font-bold text-slate-900">{b.sustainability_score}</td>
+                      <td className="px-4 py-3 font-mono text-amber-700 font-bold">{b.carbon_month_kg?.toLocaleString()} kg</td>
                     </tr>
                   ))}
                 </tbody>

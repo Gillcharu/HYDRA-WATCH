@@ -60,29 +60,28 @@ export function HomePage() {
       <section className="relative overflow-hidden px-4 pb-24 pt-16 sm:px-6 lg:pt-24">
         <div className="mx-auto max-w-7xl">
           <FadeIn>
-            <div className="inline-flex items-center gap-2 rounded-full border border-aqua-500/30 bg-aqua-500/10 px-4 py-1.5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-4 py-1.5">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-mint-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-mint-500" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-indigo-600" />
               </span>
-              <span className="font-mono text-xs font-medium text-aqua-300">Live · 121 regions validated</span>
+              <span className="font-mono text-xs font-semibold text-slate-600">Live · 121 regions validated</span>
             </div>
           </FadeIn>
 
-          <FadeIn delay={0.1}>
-            <h1 className="headline mt-8 max-w-4xl">
+          <FadeIn>
+            <h1 className="headline mt-8 max-w-4xl text-slate-900">
               Deploy AI where the{" "}
-              <span className="bg-gradient-to-r from-aqua-400 via-cyan-300 to-mint-400 bg-clip-text text-transparent">
+              <span className="text-indigo-600">
                 planet
               </span>{" "}
               can sustain it
             </h1>
           </FadeIn>
 
-          <FadeIn delay={0.2}>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-400">
-              HydraWatch models water, carbon, and cost for every major cloud region — then recommends greener
-              alternatives within your latency budget. The sustainability decision layer for global AI infrastructure.
+          <FadeIn>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
+              Pick a model and region. See how much water and carbon your workload uses, then find greener alternatives within your latency budget.
             </p>
           </FadeIn>
 
@@ -98,7 +97,7 @@ export function HomePage() {
           </FadeIn>
 
           {/* Stats strip */}
-          <FadeIn delay={0.4}>
+          <FadeIn>
             <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
               {[
                 { label: "Cloud regions", value: stats.regions },
@@ -107,7 +106,7 @@ export function HomePage() {
                 { label: "User locations", value: 40, suffix: "+" },
               ].map((s) => (
                 <div key={s.label} className="glass rounded-2xl p-5">
-                  <div className="font-display text-3xl font-bold text-white">
+                  <div className="font-display text-3xl font-bold text-slate-900">
                     <AnimatedCounter value={s.value} suffix={s.suffix ?? ""} />
                   </div>
                   <div className="mt-1 text-xs text-slate-500">{s.label}</div>
@@ -122,16 +121,15 @@ export function HomePage() {
       <section className="px-4 pb-12 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <FadeIn>
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-abyss-900 to-white/[0.01] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="absolute right-0 top-0 h-40 w-40 bg-aqua-500/10 blur-3xl" />
+            <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
               <div>
-                <span className="rounded-full bg-aqua-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-aqua-400">
+                <span className="rounded-full bg-indigo-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-600">
                   For Individuals
                 </span>
-                <h2 className="mt-3 font-display text-2xl font-bold text-white">
+                <h2 className="mt-3 font-display text-2xl font-bold text-slate-900">
                   Estimate the footprint of one AI search
                 </h2>
-                <p className="mt-2 max-w-2xl text-sm text-slate-400">
+                <p className="mt-2 max-w-2xl text-sm text-slate-600">
                   Estimate the water, energy, and carbon consumed by a single query across ChatGPT, Gemini, Claude, or Copilot.
                 </p>
               </div>
@@ -144,10 +142,10 @@ export function HomePage() {
       </section>
 
       {/* Pipeline */}
-      <section className="border-y border-white/5 bg-white/[0.02] px-4 py-12 sm:px-6">
+      <section className="border-y border-slate-200 bg-slate-100/50 px-4 py-12 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="section-label">How it works</div>
-          <h2 className="mt-2 font-display text-2xl font-bold text-white">From workload to action in one pipeline</h2>
+          <h2 className="mt-2 font-display text-2xl font-bold text-slate-900">From workload to action in one pipeline</h2>
           <div className="mt-10">
             <PipelineFlow />
           </div>
@@ -162,19 +160,15 @@ export function HomePage() {
         <div className="mx-auto max-w-7xl">
           <FadeIn>
             <div className="section-label">Capabilities</div>
-            <h2 className="mt-2 font-display text-3xl font-bold text-white">AI infrastructure sustainability intelligence</h2>
+            <h2 className="mt-2 font-display text-3xl font-bold text-slate-900">AI infrastructure sustainability intelligence</h2>
           </FadeIn>
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {BENTO.map((f, i) => (
-              <FadeIn key={f.title} delay={i * 0.06}>
-                <motion.div
-                  whileHover={{ y: -4 }}
-                  className={`bento-card h-full ${f.span}`}
-                >
-                  <div className="inline-flex h-10 min-w-10 items-center justify-center rounded-lg border border-aqua-500/20 bg-aqua-500/10 px-2 font-mono text-xs font-bold text-aqua-300">{f.icon}</div>
-                  <h3 className="mt-4 font-display text-lg font-bold text-white">{f.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-400">{f.desc}</p>
-                </motion.div>
+            {BENTO.map((f) => (
+              <FadeIn key={f.title}>
+                <div className="bento-card h-full">
+                  <h3 className="font-display text-lg font-bold text-slate-900">{f.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.desc}</p>
+                </div>
               </FadeIn>
             ))}
           </div>
@@ -186,11 +180,11 @@ export function HomePage() {
         <div className="mx-auto max-w-7xl">
           <FadeIn>
             <div className="section-label">Global coverage</div>
-            <h2 className="mt-2 font-display text-3xl font-bold text-white">Every cloud region, scored</h2>
-            <p className="mt-2 text-slate-400">Interactive sustainability map — hover any region for live metrics.</p>
+            <h2 className="mt-2 font-display text-3xl font-bold text-slate-900">Every cloud region, scored</h2>
+            <p className="mt-2 text-slate-600">Interactive sustainability map — hover any region for live metrics.</p>
           </FadeIn>
-          <FadeIn delay={0.15}>
-            <div className="mt-8 overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/40">
+          <FadeIn>
+            <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 shadow-sm bg-white">
               <WorldMap points={points} />
             </div>
           </FadeIn>
@@ -200,12 +194,11 @@ export function HomePage() {
       {/* CTA */}
       <section className="px-4 pb-24 sm:px-6">
         <FadeIn>
-          <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-aqua-500/20 bg-gradient-to-br from-aqua-500/10 via-abyss-800 to-mint-500/10 p-10 text-center sm:p-14">
-            <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-aqua-500/20 blur-3xl" />
-            <h2 className="relative font-display text-3xl font-bold text-white sm:text-4xl">
+          <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 p-10 text-center sm:p-14 shadow-sm">
+            <h2 className="relative font-display text-3xl font-bold text-slate-900 sm:text-4xl">
               Ready to see your footprint?
             </h2>
-            <p className="relative mt-4 text-slate-400">
+            <p className="relative mt-4 text-slate-600">
               Connect cloud, logs, billing CSV, or MLOps metadata. HydraWatch detects workloads automatically.
             </p>
             <Link to="/platform" className="btn-glow relative mt-8 inline-flex">

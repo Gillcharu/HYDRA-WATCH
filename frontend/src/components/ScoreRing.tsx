@@ -22,7 +22,7 @@ export function ScoreRing({
             <stop offset="100%" stopColor={color} />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="10" />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -37,7 +37,7 @@ export function ScoreRing({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <div className="font-display text-3xl font-bold text-white">{Math.round(score)}</div>
+        <div className="font-display text-3xl font-bold text-slate-900">{Math.round(score)}</div>
         <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
           {label ?? "Score"}
         </div>
@@ -48,15 +48,15 @@ export function ScoreRing({
 
 export function TierBadge({ tier }: { tier: string }) {
   const colors: Record<string, string> = {
-    V4: "from-emerald-400 to-teal-500",
-    V3: "from-cyan-400 to-blue-500",
-    V2: "from-violet-400 to-purple-500",
-    V1: "from-amber-400 to-orange-500",
-    V0: "from-slate-400 to-slate-500",
+    V4: "from-emerald-600 to-teal-700",
+    V3: "from-cyan-600 to-blue-700",
+    V2: "from-violet-600 to-purple-700",
+    V1: "from-amber-600 to-orange-700",
+    V0: "from-slate-500 to-slate-600",
   };
   return (
     <span
-      className={`inline-flex items-center rounded-full bg-gradient-to-r ${colors[tier] ?? colors.V0} px-2.5 py-0.5 font-mono text-[10px] font-bold text-abyss-950`}
+      className={`inline-flex items-center rounded-full bg-gradient-to-r ${colors[tier] ?? colors.V0} px-2.5 py-0.5 font-mono text-[10px] font-bold text-white`}
     >
       {tier}
     </span>

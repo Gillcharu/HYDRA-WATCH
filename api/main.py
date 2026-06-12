@@ -73,7 +73,7 @@ def startup_event():
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
 
-allowed_origins_str = os.environ.get("CORS_ALLOWED_ORIGINS", "*")
+allowed_origins_str = os.environ.get("CORS_ALLOWED_ORIGINS", "https://hydra-watch.onrender.com,http://localhost:5173,http://localhost:8080")
 allowed_origins = [o.strip() for o in allowed_origins_str.split(",") if o.strip()]
 
 app.add_middleware(
@@ -89,6 +89,9 @@ RATE_LIMITS = {}
 RATE_LIMIT_MAX = 100  # maximum requests per client IP per minute
 RATE_LIMIT_WINDOW = 60  # time window in seconds
 
+ANALYZE_RATE_LIMITS = {}
+ANALYZE_LIMIT_MAX = 10  # maximum requests to /api/analyze per client IP per minute
+
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     # Only rate limit API requests
@@ -96,9 +99,21 @@ async def rate_limit_middleware(request: Request, call_next):
         client_ip = request.client.host if request.client else "unknown"
         now = time.time()
         
-        # Get request history for this IP
+        # 1. Stricter check for resource-intensive /api/analyze endpoint (max 10 req/min)
+        if request.url.path == "/api/analyze":
+            analyze_history = ANALYZE_RATE_LIMITS.get(client_ip, [])
+            analyze_history = [t for t in analyze_history if now - t < RATE_LIMIT_WINDOW]
+            if len(analyze_history) >= ANALYZE_LIMIT_MAX:
+                logger.warning(f"Analyze endpoint rate limit exceeded for client IP: {client_ip}")
+                return JSONResponse(
+                    status_code=429,
+                    content={"detail": "Rate limit exceeded for analyze endpoint. Max 10 requests per minute."},
+                )
+            analyze_history.append(now)
+            ANALYZE_RATE_LIMITS[client_ip] = analyze_history
+            
+        # 2. General check for all other /api/* endpoints
         history = RATE_LIMITS.get(client_ip, [])
-        # Filter requests within the window
         history = [t for t in history if now - t < RATE_LIMIT_WINDOW]
         
         if len(history) >= RATE_LIMIT_MAX:
