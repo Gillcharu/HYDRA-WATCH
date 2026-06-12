@@ -56,8 +56,6 @@ export function LeaderboardPage() {
     score: b.sustainability_score,
   }));
 
-  const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
-
   return (
     <div className="px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-7xl">
