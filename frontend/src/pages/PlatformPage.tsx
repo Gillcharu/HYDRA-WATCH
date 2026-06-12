@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScoreRing, TierBadge } from "../components/ScoreRing";
 import { ScoreRadar, FootprintBars } from "../components/Charts";
