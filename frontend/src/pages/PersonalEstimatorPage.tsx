@@ -6,6 +6,43 @@ import { api } from "../lib/api";
 import type { Region } from "../types";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from "recharts";
 
+function formatRegionDisplayName(regionCode: string, regionName: string, country: string, city?: string): string {
+  let geo = "";
+  if (city && country) {
+    geo = `${city}, ${country}`;
+  } else if (regionName) {
+    let cleanName = regionName;
+    const match = regionName.match(/\(([^)]+)\)/);
+    if (match) {
+      cleanName = match[1];
+    }
+    geo = country ? `${cleanName}, ${country}` : cleanName;
+  } else {
+    geo = country || "";
+  }
+  return regionCode ? `${regionCode} · ${geo}` : geo;
+}
+
+function formatEstimatorWater(minL: number, maxL: number): string {
+  const minGal = minL * 0.264172;
+  const maxGal = maxL * 0.264172;
+  return `${minL.toFixed(1)} to ${maxL.toFixed(1)} L (${minGal.toFixed(1)} to ${maxGal.toFixed(1)} gal)`;
+}
+
+function formatEstimatorCarbon(minG: number, maxG: number): string {
+  if (minG < 1000) {
+    const minOz = minG * 0.035274;
+    const maxOz = maxG * 0.035274;
+    return `${minG.toFixed(0)} to ${maxG.toFixed(0)} g (${minOz.toFixed(1)} to ${maxOz.toFixed(1)} oz)`;
+  } else {
+    const minKg = minG / 1000;
+    const maxKg = maxG / 1000;
+    const minLbs = minKg * 2.20462;
+    const maxLbs = maxKg * 2.20462;
+    return `${minKg.toFixed(2)} to ${maxKg.toFixed(2)} kg (${minLbs.toFixed(1)} to ${maxLbs.toFixed(1)} lbs)`;
+  }
+}
+
 // User location coordinates mapped from GLOBAL_USER_LOCATIONS fallback list
 const USER_COORDS: Record<string, [number, number]> = {
   "Mumbai, India": [19.08, 72.88],
@@ -393,7 +430,7 @@ export function PersonalEstimatorPage() {
       carbonIntensityMin: carbon * 0.85,
       carbonIntensityMax: carbon * 1.15,
       waterStress: stress,
-      regionName: `${reg.provider} ${reg.region_name} (${reg.region_code})`,
+      regionName: `${reg.provider} · ${formatRegionDisplayName(reg.region_code, reg.region_name, reg.country, reg.city)}`,
       wueMin: stress > 3.5 ? 0.8 : 0.2,
       wueMax: stress > 3.5 ? 1.6 : 0.9,
     };
@@ -1133,13 +1170,13 @@ export function PersonalEstimatorPage() {
                         <div className="flex items-center gap-3 text-xs">
                           <div className="font-mono text-cyan-800 font-semibold">Water:</div>
                           <div className="font-bold text-slate-800">
-                            ~{estimatesA.monthlyWaterMin.toFixed(1)} to {estimatesA.monthlyWaterMax.toFixed(1)} Liters
+                            ~{formatEstimatorWater(estimatesA.monthlyWaterMin, estimatesA.monthlyWaterMax)}
                           </div>
                         </div>
                         <div className="flex items-center gap-3 text-xs">
                           <div className="font-mono text-amber-800 font-semibold">Carbon:</div>
                           <div className="font-bold text-slate-800">
-                            ~{estimatesA.monthlyCarbonMin < 1000 ? `${estimatesA.monthlyCarbonMin.toFixed(0)} to ${estimatesA.monthlyCarbonMax.toFixed(0)} g` : `${(estimatesA.monthlyCarbonMin / 1000).toFixed(2)} to ${(estimatesA.monthlyCarbonMax / 1000).toFixed(2)} kg`} CO₂e
+                            ~{formatEstimatorCarbon(estimatesA.monthlyCarbonMin, estimatesA.monthlyCarbonMax)} CO₂e
                           </div>
                         </div>
                       </div>
@@ -1155,13 +1192,13 @@ export function PersonalEstimatorPage() {
                           <div className="flex items-center gap-3 text-xs">
                             <div className="font-mono text-cyan-800 font-semibold">Water:</div>
                             <div className="font-bold text-slate-800">
-                              ~{estimatesB.monthlyWaterMin.toFixed(1)} to {estimatesB.monthlyWaterMax.toFixed(1)} Liters
+                              ~{formatEstimatorWater(estimatesB.monthlyWaterMin, estimatesB.monthlyWaterMax)}
                             </div>
                           </div>
                           <div className="flex items-center gap-3 text-xs">
                             <div className="font-mono text-amber-800 font-semibold">Carbon:</div>
                             <div className="font-bold text-slate-800">
-                              ~{estimatesB.monthlyCarbonMin < 1000 ? `${estimatesB.monthlyCarbonMin.toFixed(0)} to ${estimatesB.monthlyCarbonMax.toFixed(0)} g` : `${(estimatesB.monthlyCarbonMin / 1000).toFixed(2)} to ${(estimatesB.monthlyCarbonMax / 1000).toFixed(2)} kg`} CO₂e
+                              ~{formatEstimatorCarbon(estimatesB.monthlyCarbonMin, estimatesB.monthlyCarbonMax)} CO₂e
                             </div>
                           </div>
                         </div>

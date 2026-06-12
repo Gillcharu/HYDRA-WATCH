@@ -27,6 +27,8 @@ export interface Region {
   region_name: string;
   country: string;
   state?: string;
+  city?: string;
+  carbon_confidence?: string;
   carbon_kg_per_kwh: number;
   water_stress_score: number;
   water_stress_label?: string;

@@ -6,6 +6,28 @@ import { ScoreRing } from "../components/ScoreRing";
 import { api } from "../lib/api";
 import type { LeaderboardEntry } from "../types";
 
+function formatRegionDisplayName(regionCode: string, regionName: string, country: string, city?: string): string {
+  let geo = "";
+  if (city && country) {
+    geo = `${city}, ${country}`;
+  } else if (regionName) {
+    let cleanName = regionName;
+    const match = regionName.match(/\(([^)]+)\)/);
+    if (match) {
+      cleanName = match[1];
+    }
+    geo = country ? `${cleanName}, ${country}` : cleanName;
+  } else {
+    geo = country || "";
+  }
+  return regionCode ? `${regionCode} · ${geo}` : geo;
+}
+
+function formatCarbonValue(kg: number): string {
+  const lbs = kg * 2.20462;
+  return `${Math.round(kg).toLocaleString()} kg (${Math.round(lbs).toLocaleString()} lbs)`;
+}
+
 export function LeaderboardPage() {
   const [location, setLocation] = useState("Mumbai, India");
   const [locations, setLocations] = useState<string[]>([]);
@@ -78,8 +100,10 @@ export function LeaderboardPage() {
                     <div className="mb-3 text-3xl">{medals[i]}</div>
                     <ScoreRing score={b.sustainability_score} size={i === 1 ? 120 : 90} />
                     <div className="mt-3 max-w-[140px] text-center">
-                      <div className="truncate font-semibold text-slate-900">{b.region_name}</div>
-                      <div className="text-xs text-slate-500">{b.provider}</div>
+                      <div className="truncate font-semibold text-slate-900 text-xs" title={formatRegionDisplayName(b.region_code, b.region_name, b.country)}>
+                        {formatRegionDisplayName(b.region_code, b.region_name, b.country)}
+                      </div>
+                      <div className="text-[10px] text-slate-500">{b.provider}</div>
                     </div>
                     <div className={`mt-4 w-24 rounded-t-xl bg-gradient-to-t from-slate-200 to-slate-100 border border-slate-200 ${heights[i]} flex items-end justify-center pb-2`}>
                       <span className="font-display text-2xl font-bold text-slate-800">#{rank}</span>
@@ -119,11 +143,15 @@ export function LeaderboardPage() {
                     <tr key={b.region_code} className="border-b border-slate-100 hover:bg-slate-50/50">
                       <td className="px-4 py-3 font-display font-bold text-indigo-600">{b.rank}</td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-slate-900">{b.region_name}</div>
+                        <div className="font-medium text-slate-900">
+                          {formatRegionDisplayName(b.region_code, b.region_name, b.country)}
+                        </div>
                         <div className="text-xs text-slate-500">{b.provider} · {b.latency_ms}ms</div>
                       </td>
                       <td className="px-4 py-3 font-bold text-slate-900">{b.sustainability_score}</td>
-                      <td className="px-4 py-3 font-mono text-amber-700 font-bold">{b.carbon_month_kg?.toLocaleString()} kg</td>
+                      <td className="px-4 py-3 font-mono text-amber-700 font-bold">
+                        {formatCarbonValue(b.carbon_month_kg)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

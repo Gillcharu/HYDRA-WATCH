@@ -1,23 +1,64 @@
 import { useEffect, useRef, useState } from "react";
 import type { MapPoint } from "../types";
 
+const LAND_CENTERS = [
+  { lat: 55, lon: -100, r: 25 }, // North America Center
+  { lat: 40, lon: -90, r: 18 },  // North America South
+  { lat: -15, lon: -60, r: 22 }, // South America North
+  { lat: -40, lon: -65, r: 12 }, // South America South
+  { lat: 55, lon: 20, r: 18 },   // Europe
+  { lat: 60, lon: 95, r: 30 },   // Siberia / Northern Asia
+  { lat: 35, lon: 100, r: 22 },  // China / East Asia
+  { lat: 20, lon: 80, r: 14 },   // India / South Asia
+  { lat: 5, lon: 20, r: 22 },    // Africa Central
+  { lat: 25, lon: 20, r: 15 },   // Africa North
+  { lat: -20, lon: 25, r: 14 },  // Africa South
+  { lat: -25, lon: 135, r: 18 }, // Australia
+  { lat: 65, lon: -40, r: 12 },  // Greenland
+  { lat: 75, lon: -100, r: 12 }, // Northern Canada islands
+  { lat: -78, lon: 0, r: 15 }    // Antarctica
+];
+
+const landPoints = (() => {
+  const pts: { lat: number; lon: number; isTan: boolean }[] = [];
+  for (let lat = -80; lat <= 80; lat += 3.5) {
+    for (let lon = -180; lon <= 180; lon += 4) {
+      for (const center of LAND_CENTERS) {
+        let dLon = Math.abs(lon - center.lon);
+        if (dLon > 180) dLon = 360 - dLon;
+        const dLat = lat - center.lat;
+        const dist = Math.sqrt(dLat * dLat + dLon * dLon);
+        if (dist < center.r) {
+          const isTan = (Math.abs(Math.round(lat)) + Math.abs(Math.round(lon))) % 2 === 0;
+          pts.push({ lat, lon, isTan });
+          break;
+        }
+      }
+    }
+  }
+  return pts;
+})();
+
 function scoreColor(score: number): string {
-  if (score >= 70) return "#14b8a6"; // mint/cyan
-  if (score >= 50) return "#06b6d4"; // blue-cyan
-  if (score >= 35) return "#f59e0b"; // amber
+  if (score >= 70) return "#10b981"; // emerald
+  if (score >= 50) return "#f59e0b"; // amber
+  if (score >= 35) return "#f97316"; // orange
   return "#ef4444"; // red
 }
 
 function getDotColor(point: MapPoint, layer: "score" | "water" | "carbon"): string {
   if (layer === "water") {
-    if (point.water_stress <= 1.5) return "#14b8a6"; // low (mint/cyan)
-    if (point.water_stress <= 3.5) return "#f59e0b"; // moderate (amber)
+    // Water stress: encoded in amber-to-red, not cyan-to-purple
+    if (point.water_stress <= 1.5) return "#fbcfe8"; // very low (soft pink/gray placeholder or light yellow)
+    // Wait, let's use yellow-orange-red for water stress
+    if (point.water_stress <= 1.5) return "#fde047"; // low stress (yellow)
+    if (point.water_stress <= 3.5) return "#f97316"; // moderate (orange)
     return "#ef4444"; // critical (red)
   }
   if (layer === "carbon") {
-    if (point.carbon <= 0.15) return "#14b8a6"; // low (mint/cyan)
-    if (point.carbon <= 0.45) return "#f59e0b"; // moderate (amber)
-    return "#ef4444"; // high (red)
+    if (point.carbon <= 0.15) return "#10b981"; // low carbon
+    if (point.carbon <= 0.45) return "#f59e0b"; // moderate carbon
+    return "#ef4444"; // high carbon
   }
   return scoreColor(point.score);
 }
@@ -82,17 +123,17 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
         cy,
         R
       );
-      radialGrad.addColorStop(0, "#0b172a"); // Dark slate inner
-      radialGrad.addColorStop(0.7, "#030712"); // Abyss gray
-      radialGrad.addColorStop(1, "#020617"); // Pure dark edge
+      radialGrad.addColorStop(0, "#ffffff"); // Light center reflection
+      radialGrad.addColorStop(0.85, "#f8fafc"); // Slate-50 main body
+      radialGrad.addColorStop(1, "#cbd5e1"); // Slate-300 edge shadowing
       ctx.beginPath();
       ctx.arc(cx, cy, R, 0, 2 * Math.PI);
       ctx.fillStyle = radialGrad;
       ctx.fill();
 
-      // Outer thin glowing boundary
-      ctx.strokeStyle = "rgba(6, 182, 212, 0.15)";
-      ctx.lineWidth = 1.5;
+      // Outer thin boundary
+      ctx.strokeStyle = "rgba(15, 23, 42, 0.1)";
+      ctx.lineWidth = 1;
       ctx.stroke();
 
       const rY = rotationY.current;
@@ -121,6 +162,18 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
         return { x: cx + x2, y: cy + y2, z: z2 };
       };
 
+      // 1b. Draw Land Particle Dots
+      landPoints.forEach((pt) => {
+        const ptProj = project(pt.lat, pt.lon);
+        if (ptProj.z > 2) { // draw only on front hemisphere with safety margin
+          ctx.beginPath();
+          ctx.arc(ptProj.x, ptProj.y, 1.3, 0, 2 * Math.PI);
+          // sage green or tan
+          ctx.fillStyle = pt.isTan ? "#e2dbcd" : "#c4ccc0";
+          ctx.fill();
+        }
+      });
+
       // 2. Draw Latitudes Grid Lines
       const latSteps = [-60, -30, 0, 30, 60];
       latSteps.forEach((lat) => {
@@ -139,8 +192,8 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
             first = true;
           }
         }
-        ctx.strokeStyle = lat === 0 ? "rgba(8, 145, 178, 0.16)" : "rgba(8, 145, 178, 0.05)";
-        ctx.lineWidth = lat === 0 ? 1.5 : 1;
+        ctx.strokeStyle = lat === 0 ? "rgba(15, 23, 42, 0.08)" : "rgba(15, 23, 42, 0.03)";
+        ctx.lineWidth = lat === 0 ? 1.2 : 0.8;
         ctx.stroke();
       });
 
@@ -162,8 +215,8 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
             first = true;
           }
         }
-        ctx.strokeStyle = "rgba(8, 145, 178, 0.05)";
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(15, 23, 42, 0.03)";
+        ctx.lineWidth = 0.8;
         ctx.stroke();
       });
 
@@ -337,7 +390,7 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
   };
 
   return (
-    <div ref={containerRef} className="relative overflow-hidden bg-gradient-to-b from-abyss-900 to-abyss-950 min-h-[480px]">
+    <div ref={containerRef} className="relative overflow-hidden bg-slate-50 border border-slate-200 rounded-2xl min-h-[480px]">
       <canvas
         ref={canvasRef}
         onMouseDown={handleMouseDown}
@@ -351,7 +404,7 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
       />
 
       <div className="absolute left-4 top-4 glass rounded-xl px-4 py-3 pointer-events-none">
-        <div className="font-display text-sm font-bold text-white">{points.length} regions</div>
+        <div className="font-display text-sm font-bold text-slate-900">{points.length} regions</div>
         <div className="text-[10px] text-slate-500 font-mono mt-0.5">Drag to spin globe · Hover dots</div>
       </div>
 
@@ -366,8 +419,8 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
             }}
             className={`rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase transition ${
               layer === l
-                ? "bg-gradient-to-r from-aqua-500 to-mint-500 text-abyss-950 shadow-sm shadow-aqua-500/10"
-                : "text-slate-400 hover:text-white"
+                ? "bg-slate-900 text-white shadow-sm"
+                : "text-slate-500 hover:text-slate-800"
             }`}
           >
             {l === "score" ? "Score" : l === "water" ? "Water" : "Carbon"}
@@ -379,46 +432,49 @@ export function WorldMap({ points }: { points: MapPoint[] }) {
         <div className="absolute bottom-4 left-4 right-4 glass-strong rounded-xl p-5 md:left-auto md:w-80">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <div className="font-display font-bold text-white">{active.region_name}</div>
-              <div className="mt-0.5 font-mono text-[10px] text-aqua-400">
+              <div className="font-display font-bold text-slate-900">{active.region_name}</div>
+              <div className="mt-0.5 font-mono text-[10px] text-slate-500">
                 {active.provider} · {active.region_code}
               </div>
             </div>
             <div
-              className="rounded-lg px-2 py-1 font-display text-lg font-bold text-abyss-950 shadow-md"
-              style={{ backgroundColor: getDotColor(active, layer) }}
+              className="rounded-lg px-2 py-1 font-display text-lg font-bold shadow-sm"
+              style={{
+                backgroundColor: getDotColor(active, layer),
+                color: (layer === "water" && active.water_stress <= 1.5) ? "#1e293b" : "#ffffff"
+              }}
             >
               {layer === "water" ? (active.water_stress === 0 ? "Low" : active.water_stress.toFixed(1)) : layer === "carbon" ? active.carbon.toFixed(2) : active.score.toFixed(0)}
             </div>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-            <div className={`rounded-lg p-2 transition ${layer === "carbon" ? "bg-amber-500/20 border border-amber-500/35" : "bg-white/5"}`}>
+            <div className={`rounded-lg p-2 transition ${layer === "carbon" ? "bg-amber-50 border border-amber-200" : "bg-slate-100/60 border border-slate-200/40"}`}>
               <div className="text-slate-500">Carbon</div>
-              <div className="font-mono font-bold text-white mt-0.5">{active.carbon}</div>
+              <div className="font-mono font-bold text-slate-900 mt-0.5">{active.carbon}</div>
             </div>
-            <div className={`rounded-lg p-2 transition ${layer === "water" ? "bg-cyan-500/20 border border-cyan-500/35" : "bg-white/5"}`}>
+            <div className={`rounded-lg p-2 transition ${layer === "water" ? "bg-orange-50 border border-orange-200" : "bg-slate-100/60 border border-slate-200/40"}`}>
               <div className="text-slate-500">Water</div>
-              <div className="font-mono font-bold text-white text-[10px] leading-tight mt-0.5">
+              <div className="font-mono font-bold text-slate-900 text-[10px] leading-tight mt-0.5">
                 {active.water_stress === 0 ? "Low" : `${active.water_stress.toFixed(2)}/5`}
               </div>
             </div>
-            <div className={`rounded-lg p-2 transition ${layer === "score" ? "bg-mint-500/20 border border-mint-500/35" : "bg-white/5"}`}>
+            <div className={`rounded-lg p-2 transition ${layer === "score" ? "bg-emerald-50 border border-emerald-200" : "bg-slate-100/60 border border-slate-200/40"}`}>
               <div className="text-slate-500">Rating</div>
-              <div className="font-mono font-bold text-white mt-0.5">{active.score.toFixed(0)}</div>
+              <div className="font-mono font-bold text-slate-900 mt-0.5">{active.score.toFixed(0)}</div>
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex flex-wrap justify-center gap-6 border-t border-white/5 bg-abyss-950/80 px-4 py-3 text-[11px] text-slate-500">
+      <div className="flex flex-wrap justify-center gap-6 border-t border-slate-200 bg-slate-100/50 px-4 py-3 text-[11px] text-slate-500 rounded-b-2xl">
         <span className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-mint-500" /> 70+ excellent
+          <span className="h-2 w-2 rounded-full bg-emerald-500" /> 70+ excellent
         </span>
         <span className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-aqua-500" /> 50–69 good
+          <span className="h-2 w-2 rounded-full bg-amber-500" /> 50–69 good
         </span>
         <span className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-amber-500" /> 35–49 review
+          <span className="h-2 w-2 rounded-full bg-orange-500" /> 35–49 review
         </span>
         <span className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-red-500" /> &lt;35 high risk

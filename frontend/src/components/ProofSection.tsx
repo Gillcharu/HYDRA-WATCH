@@ -51,59 +51,67 @@ export function ProofSection() {
         <div className="mt-12 grid gap-6 lg:grid-cols-2">
           {/* Mumbai */}
           <FadeIn>
-            <div className="glass relative overflow-hidden rounded-2xl p-8">
+            <div className="glass relative overflow-hidden rounded-2xl p-8 bg-white border border-slate-200 shadow-sm">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="text-sm font-semibold text-red-600">Current deployment</div>
-                  <h3 className="mt-1 font-display text-2xl font-bold text-slate-900">Mumbai</h3>
-                  <div className="mt-1 font-mono text-xs text-slate-500">AWS ap-south-1</div>
+                  <h3 className="mt-1 font-display text-xl font-bold text-slate-900">ap-south-1 · Mumbai, India</h3>
+                  <div className="mt-1 font-mono text-xs text-slate-500">AWS</div>
                 </div>
                 <ScoreRing score={mumbai.score} size={100} />
               </div>
               <div className="mt-8 grid grid-cols-2 gap-4">
-                <div className="rounded-xl bg-slate-100 p-4">
-                  <div className="text-2xl font-bold text-amber-600">{mumbai.carbon_kg_month.toLocaleString()}</div>
-                  <div className="text-xs text-slate-500">kg CO₂ / month</div>
+                <div className="rounded-xl bg-slate-100 p-4 border border-slate-200/50">
+                  <div className="text-xl font-bold text-amber-600">
+                    {mumbai.carbon_kg_month.toLocaleString()} kg
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500">({Math.round(mumbai.carbon_kg_month * 2.20462).toLocaleString()} lbs) CO₂/mo</div>
                 </div>
-                <div className="rounded-xl bg-slate-100 p-4">
-                  <div className="text-2xl font-bold text-cyan-600">{mumbai.water_L_month.toLocaleString()}</div>
-                  <div className="text-xs text-slate-500">L water / month</div>
+                <div className="rounded-xl bg-slate-100 p-4 border border-slate-200/50">
+                  <div className="text-xl font-bold text-cyan-600">
+                    {mumbai.water_L_month.toLocaleString()} L
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500">({Math.round(mumbai.water_L_month * 0.264172).toLocaleString()} gal) H₂O/mo</div>
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <TierBadge tier={mumbai.footprint_tier} />
-                <span className="text-xs text-slate-500">India grid ~0.71 kg/kWh</span>
+                <span className="text-xs text-slate-500">India grid est. 710 ± 70 gCO2e/kWh</span>
               </div>
             </div>
           </FadeIn>
 
           {/* Stockholm */}
           <FadeIn>
-            <div className="glass relative overflow-hidden rounded-2xl p-8 border-teal-200">
+            <div className="glass relative overflow-hidden rounded-2xl p-8 bg-white border border-teal-200 shadow-sm">
               <div className="absolute left-4 top-4 rounded-full bg-teal-50 border border-teal-200/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-teal-700">
                 Recommended
               </div>
               <div className="flex items-start justify-between pt-6">
                 <div>
                   <div className="text-sm font-semibold text-teal-600">Greener alternative</div>
-                  <h3 className="mt-1 font-display text-2xl font-bold text-slate-900">Stockholm</h3>
-                  <div className="mt-1 font-mono text-xs text-slate-500">AWS eu-north-1</div>
+                  <h3 className="mt-1 font-display text-xl font-bold text-slate-900">eu-north-1 · Stockholm, Sweden</h3>
+                  <div className="mt-1 font-mono text-xs text-slate-500">AWS</div>
                 </div>
                 <ScoreRing score={stockholm.score} size={100} />
               </div>
               <div className="mt-8 grid grid-cols-2 gap-4">
                 <div className="rounded-xl bg-teal-50/50 border border-teal-100 p-4">
-                  <div className="text-2xl font-bold text-teal-600">{stockholm.carbon_kg_month.toLocaleString()}</div>
-                  <div className="text-xs text-slate-500">kg CO₂ / month</div>
+                  <div className="text-xl font-bold text-teal-600">
+                    {stockholm.carbon_kg_month.toLocaleString()} kg
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500">({Math.round(stockholm.carbon_kg_month * 2.20462).toLocaleString()} lbs) CO₂/mo</div>
                 </div>
-                <div className="rounded-xl bg-slate-100 p-4">
-                  <div className="text-2xl font-bold text-cyan-600">{stockholm.water_L_month.toLocaleString()}</div>
-                  <div className="text-xs text-slate-500">L water / month</div>
+                <div className="rounded-xl bg-slate-100 p-4 border border-slate-200/50">
+                  <div className="text-xl font-bold text-cyan-600">
+                    {stockholm.water_L_month.toLocaleString()} L
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-500">({Math.round(stockholm.water_L_month * 0.264172).toLocaleString()} gal) H₂O/mo</div>
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <TierBadge tier={stockholm.footprint_tier} />
-                <span className="text-xs text-slate-500">Sweden grid ~0.04 kg/kWh</span>
+                <span className="text-xs text-slate-500">Sweden grid est. 40 ± 2 gCO2e/kWh</span>
               </div>
             </div>
           </FadeIn>

@@ -5,6 +5,40 @@ import { WorldMap } from "../components/WorldMap";
 import { api } from "../lib/api";
 import type { MapPoint, Region } from "../types";
 
+function formatRegionDisplayName(regionCode: string, regionName: string, country: string, city?: string): string {
+  let geo = "";
+  if (city && country) {
+    geo = `${city}, ${country}`;
+  } else if (regionName) {
+    let cleanName = regionName;
+    const match = regionName.match(/\(([^)]+)\)/);
+    if (match) {
+      cleanName = match[1];
+    }
+    geo = country ? `${cleanName}, ${country}` : cleanName;
+  } else {
+    geo = country || "";
+  }
+  return regionCode ? `${regionCode} · ${geo}` : geo;
+}
+
+function formatCarbonIntensity(kgPerKwh: number, confidence?: string): string {
+  const gPerKwh = kgPerKwh * 1000;
+  let percent = 0.10;
+  if (confidence === "high") percent = 0.05;
+  else if (confidence === "medium") percent = 0.10;
+  else percent = 0.15;
+  
+  let margin = gPerKwh * percent;
+  if (margin < 10) {
+    margin = Math.round(margin * 2) / 2;
+  } else {
+    margin = Math.round(margin / 10) * 10;
+  }
+  const value = Math.round(gPerKwh);
+  return `est. ${value} ± ${margin} gCO2e/kWh`;
+}
+
 const PROVIDER_COLORS: Record<string, string> = {
   AWS: "#ff9900",
   GCP: "#4285f4",
@@ -99,10 +133,10 @@ export function RegionsPage() {
             <table className="w-full text-left text-sm">
               <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500">
                 <tr>
-                  <th className="px-5 py-4">Region</th>
+                  <th className="px-5 py-4">Region (Code · Geography)</th>
                   <th className="px-5 py-4">Provider</th>
                   <th className="px-5 py-4">Country</th>
-                  <th className="px-5 py-4">Carbon</th>
+                  <th className="px-5 py-4">Grid Intensity</th>
                   <th className="px-5 py-4">Water stress</th>
                 </tr>
               </thead>
@@ -123,8 +157,9 @@ export function RegionsPage() {
                       className="border-b border-slate-100 transition hover:bg-slate-50"
                     >
                       <td className="px-5 py-4">
-                        <div className="font-medium text-slate-900">{r.region_name}</div>
-                        <div className="font-mono text-[10px] text-slate-500">{r.region_code}</div>
+                        <div className="font-medium text-slate-900">
+                          {formatRegionDisplayName(r.region_code, r.region_name, r.country, r.city)}
+                        </div>
                       </td>
                       <td className="px-5 py-4">
                         <span
@@ -135,7 +170,9 @@ export function RegionsPage() {
                         </span>
                       </td>
                       <td className="px-5 py-4 text-slate-600">{r.country}</td>
-                      <td className="px-5 py-4 font-mono text-amber-700 font-bold">{r.carbon_kg_per_kwh}</td>
+                      <td className="px-5 py-4 font-mono text-amber-700 font-bold">
+                        {formatCarbonIntensity(r.carbon_kg_per_kwh, r.carbon_confidence)}
+                      </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2">
                           <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-200">

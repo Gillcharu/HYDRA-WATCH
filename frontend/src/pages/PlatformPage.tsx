@@ -6,13 +6,33 @@ import { FadeIn } from "../components/AnimatedCounter";
 import { api } from "../lib/api";
 import type { AnalyzeRequest, AnalyzeResult, Meta, Region, Scenario } from "../types";
 
-function formatRegionName(provider: string, name: string) {
-  let cleanName = name;
-  const match = name.match(/\(([^)]+)\)/);
-  if (match) {
-    cleanName = match[1];
+function formatRegionDisplayName(regionCode: string, regionName: string, country: string, city?: string): string {
+  let geo = "";
+  if (city && country) {
+    geo = `${city}, ${country}`;
+  } else if (regionName) {
+    let cleanName = regionName;
+    const match = regionName.match(/\(([^)]+)\)/);
+    if (match) {
+      cleanName = match[1];
+    }
+    geo = country ? `${cleanName}, ${country}` : cleanName;
+  } else {
+    geo = country || "";
   }
-  return `${provider} ${cleanName}`;
+  return regionCode ? `${regionCode} · ${geo}` : geo;
+}
+
+function formatWaterRange(lowL: number, highL: number): string {
+  const lowGal = lowL * 0.264172;
+  const highGal = highL * 0.264172;
+  return `${Math.round(lowL).toLocaleString()}–${Math.round(highL).toLocaleString()} L (${Math.round(lowGal).toLocaleString()}–${Math.round(highGal).toLocaleString()} gal)`;
+}
+
+function formatCarbonRange(lowKg: number, highKg: number): string {
+  const lowLbs = lowKg * 2.20462;
+  const highLbs = highKg * 2.20462;
+  return `${Math.round(lowKg).toLocaleString()}–${Math.round(highKg).toLocaleString()} kg (${Math.round(lowLbs).toLocaleString()}–${Math.round(highLbs).toLocaleString()} lbs)`;
 }
 
 const DEFAULT: AnalyzeRequest = {
@@ -215,7 +235,12 @@ export function PlatformPage() {
                 <div className={`mt-2 font-semibold ${activeWorkload === workload.id ? "text-slate-900" : "text-slate-700"}`}>{workload.name}</div>
                 <div className="mt-1 text-xs text-slate-500">{workload.owner}</div>
                 <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-slate-500">
-                   <span>{workload.params.provider} · {workload.params.region_code}</span>
+                  <span>
+                    {(() => {
+                      const reg = regions.find(r => r.region_code === workload.params.region_code);
+                      return `${workload.params.provider} · ${reg ? formatRegionDisplayName(workload.params.region_code, reg.region_name, reg.country, reg.city) : workload.params.region_code}`;
+                    })()}
+                  </span>
                   <span>{workload.params.gpu_type}</span>
                   <span>{workload.params.model_name}</span>
                   <span>~{(workload.params.qps * 0.0864).toFixed(1)}M requests/day</span>
@@ -233,8 +258,11 @@ export function PlatformPage() {
             <div className="mt-5 space-y-4">
               <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
                 {[
-                   ["Provider", params.provider],
-                  ["Region", params.region_code],
+                  ["Provider", params.provider],
+                  ["Region", (() => {
+                    const reg = regions.find(r => r.region_code === params.region_code);
+                    return reg ? formatRegionDisplayName(params.region_code, reg.region_name, reg.country, reg.city) : params.region_code;
+                  })()],
                   ["Model", params.model_name],
                   ["GPU", params.gpu_type],
                   ["Traffic", `~${(params.qps * 0.0864).toFixed(1)}M req/day · ${params.avg_tokens.toLocaleString()} tokens/req`],
@@ -271,7 +299,7 @@ export function PlatformPage() {
                   <div>
                     <label className="label-dark">Region</label>
                     <select className="input-dark" value={params.region_code} onChange={(e) => setParams({ ...params, region_code: e.target.value })}>
-                      {regions.map((r) => <option key={r.region_code} value={r.region_code}>{r.region_name}</option>)}
+                      {regions.map((r) => <option key={r.region_code} value={r.region_code}>{formatRegionDisplayName(r.region_code, r.region_name, r.country, r.city)}</option>)}
                     </select>
                   </div>
                   <div>
@@ -412,7 +440,10 @@ export function PlatformPage() {
                             </div>
                           </div>
                           <div className="mt-4 rounded-lg bg-red-100/50 p-3 border border-red-200 text-xs text-red-800">
-                            <strong>Dispatch Action Prompted:</strong> High-risk workload detected. We recommend dispatching this workload to a low water-stress alternative, such as <strong>{result.multicloud[0]?.region_name || "eu-north-1 (Stockholm)"}</strong> to preserve vital local freshwater tables.
+                            <strong>Dispatch Action Prompted:</strong> High-risk workload detected. We recommend dispatching this workload to a low water-stress alternative, such as <strong>{(() => {
+                              const bestAlt = regions.find(r => r.region_code === result.multicloud[0]?.region_code);
+                              return bestAlt ? `${result.multicloud[0]?.provider} · ${formatRegionDisplayName(bestAlt.region_code, bestAlt.region_name, bestAlt.country, bestAlt.city)}` : "eu-north-1 (Stockholm)";
+                            })()}</strong> to preserve vital local freshwater tables.
                           </div>
                         </div>
                       </div>
@@ -436,8 +467,18 @@ export function PlatformPage() {
                           <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Recommended Action</div>
                           <h3 className="font-display text-base font-semibold text-slate-900 sm:text-lg">
                             Recommended action: Move <span className="text-indigo-600 font-extrabold">{DETECTED_WORKLOADS.find(w => w.id === activeWorkload)?.name || "your workload"}</span> from{" "}
-                            <span className="text-slate-700 font-bold">{formatRegionName(result.current.provider, result.current.region_name)}</span> to{" "}
-                            <span className="text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">{formatRegionName(result.multicloud[0].provider, result.multicloud[0].region_name)}</span>
+                            <span className="text-slate-700 font-bold">
+                              {(() => {
+                                const reg = regions.find(r => r.region_code === result.current.region_code);
+                                return `${result.current.provider} · ${reg ? formatRegionDisplayName(result.current.region_code, reg.region_name, reg.country, reg.city) : result.current.region_code}`;
+                              })()}
+                            </span> to{" "}
+                            <span className="text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">
+                              {(() => {
+                                const reg = regions.find(r => r.region_code === result.multicloud[0].region_code);
+                                return `${result.multicloud[0].provider} · ${reg ? formatRegionDisplayName(result.multicloud[0].region_code, reg.region_name, reg.country, reg.city) : result.multicloud[0].region_code}`;
+                              })()}
+                            </span>
                           </h3>
                         </div>
                       </div>
@@ -452,7 +493,12 @@ export function PlatformPage() {
                       </div>
                       <div className="p-8">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="font-display text-2xl font-bold text-slate-900">{result.current.region_name}</h2>
+                          <h2 className="font-display text-2xl font-bold text-slate-900">
+                            {(() => {
+                              const reg = regions.find(r => r.region_code === result.current.region_code);
+                              return reg ? formatRegionDisplayName(result.current.region_code, reg.region_name, reg.country, reg.city) : `${result.current.region_code} · ${result.current.region_name}`;
+                            })()}
+                          </h2>
                           <TierBadge tier={result.verification.footprint_tier} />
                         </div>
                         <p className="mt-1 text-slate-600">
@@ -469,8 +515,8 @@ export function PlatformPage() {
                       </div>
                       <div className="grid grid-cols-3 border-t border-slate-200 md:border-l md:border-slate-200 md:border-t-0">
                         {[
-                          { label: "Water / mo", text: fp ? `${fp.water_L_month.low.toLocaleString(undefined, { maximumFractionDigits: 0 })}–${fp.water_L_month.high.toLocaleString(undefined, { maximumFractionDigits: 0 })} L` : "—", color: "text-cyan-700" },
-                          { label: "Carbon / mo", text: fp ? `${fp.carbon_kg_month.low.toLocaleString(undefined, { maximumFractionDigits: 0 })}–${fp.carbon_kg_month.high.toLocaleString(undefined, { maximumFractionDigits: 0 })} kg` : "—", color: "text-amber-700" },
+                          { label: "Water / mo", text: fp ? formatWaterRange(fp.water_L_month.low, fp.water_L_month.high) : "—", color: "text-cyan-700" },
+                          { label: "Carbon / mo", text: fp ? formatCarbonRange(fp.carbon_kg_month.low, fp.carbon_kg_month.high) : "—", color: "text-amber-700" },
                           { label: "Cost / mo", text: fp ? `$${fp.cost_usd_month.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—", color: "text-indigo-600" },
                         ].map((m) => (
                           <div key={m.label} className="border-slate-200 p-4 text-center [&:not(:last-child)]:border-r">
@@ -501,14 +547,14 @@ export function PlatformPage() {
                           <div className="glass rounded-xl p-4 text-left bg-white border border-slate-200 shadow-sm">
                             <div className="text-[10px] uppercase tracking-wider text-slate-500">Scope 3 Embodied / mo</div>
                             <div className={`font-display text-xl font-bold text-amber-700`}>
-                              {fp.embodied_carbon_kg_month ? `${fp.embodied_carbon_kg_month.low.toLocaleString(undefined, { maximumFractionDigits: 0 })}–${fp.embodied_carbon_kg_month.high.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—"} kg
+                              {fp.embodied_carbon_kg_month ? formatCarbonRange(fp.embodied_carbon_kg_month.low, fp.embodied_carbon_kg_month.high) : "—"}
                             </div>
                             <div className="mt-1 text-xs text-slate-500">Chip manufacturing &amp; logistics</div>
                           </div>
                           <div className="glass rounded-xl p-4 text-left bg-white border border-slate-200 shadow-sm">
                             <div className="text-[10px] uppercase tracking-wider text-slate-500">Total Carbon / mo</div>
                             <div className={`font-display text-xl font-bold text-red-700`}>
-                              {fp.total_carbon_kg_month ? `${fp.total_carbon_kg_month.low.toLocaleString(undefined, { maximumFractionDigits: 0 })}–${fp.total_carbon_kg_month.high.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—"} kg
+                              {fp.total_carbon_kg_month ? formatCarbonRange(fp.total_carbon_kg_month.low, fp.total_carbon_kg_month.high) : "—"}
                             </div>
                             <div className="mt-1 text-xs text-slate-500">Scope 2 + Scope 3 emissions</div>
                           </div>
@@ -538,21 +584,21 @@ export function PlatformPage() {
                           <div className="glass rounded-xl p-4 text-left bg-white border border-slate-200 shadow-sm">
                             <div className="text-[10px] uppercase tracking-wider text-slate-500">Operational Water / mo</div>
                             <div className={`font-display text-xl font-bold text-cyan-700`}>
-                              {fp ? `${fp.water_L_month.low.toLocaleString(undefined, { maximumFractionDigits: 0 })}–${fp.water_L_month.high.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—"} L
+                              {fp ? formatWaterRange(fp.water_L_month.low, fp.water_L_month.high) : "—"}
                             </div>
                             <div className="mt-1 text-xs text-slate-500">Facility cooling evaporation</div>
                           </div>
                           <div className="glass rounded-xl p-4 text-left bg-white border border-slate-200 shadow-sm">
                             <div className="text-[10px] uppercase tracking-wider text-slate-500">Scope 3 Embodied Water / mo</div>
                             <div className={`font-display text-xl font-bold text-sky-700`}>
-                              {fp.embodied_water_L_month ? `${fp.embodied_water_L_month.low.toLocaleString(undefined, { maximumFractionDigits: 0 })}–${fp.embodied_water_L_month.high.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—"} L
+                              {fp.embodied_water_L_month ? formatWaterRange(fp.embodied_water_L_month.low, fp.embodied_water_L_month.high) : "—"}
                             </div>
                             <div className="mt-1 text-xs text-slate-500">GPU &amp; server manufacturing</div>
                           </div>
                           <div className="glass rounded-xl p-4 text-left bg-white border border-slate-200 shadow-sm">
                             <div className="text-[10px] uppercase tracking-wider text-slate-500">Total Lifecycle Water / mo</div>
                             <div className={`font-display text-xl font-bold text-blue-700`}>
-                              {fp.total_water_L_month ? `${fp.total_water_L_month.low.toLocaleString(undefined, { maximumFractionDigits: 0 })}–${fp.total_water_L_month.high.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—"} L
+                              {fp.total_water_L_month ? formatWaterRange(fp.total_water_L_month.low, fp.total_water_L_month.high) : "—"}
                             </div>
                             <div className="mt-1 text-xs text-slate-500">Scope 2 + Scope 3 water footprint</div>
                           </div>
@@ -609,8 +655,13 @@ export function PlatformPage() {
                                 BEST PICK
                               </span>
                             )}
-                            <div className="font-semibold text-slate-900">{m.region_name}</div>
-                            <div className="font-mono text-xs text-slate-500">{m.provider} · {m.region_code}</div>
+                            <div className="font-semibold text-slate-900">
+                              {(() => {
+                                const reg = regions.find(r => r.region_code === m.region_code);
+                                return reg ? formatRegionDisplayName(m.region_code, reg.region_name, reg.country, reg.city) : `${m.region_code} · ${m.region_name}`;
+                              })()}
+                            </div>
+                            <div className="font-mono text-xs text-slate-500">{m.provider}</div>
                             <div className="mt-4 flex items-end justify-between">
                               <div>
                                 <div className="font-display text-2xl font-bold text-slate-900">{m.sustainability_score}</div>

@@ -8,6 +8,9 @@
   }
   body {
     @apply bg-slate-50 font-sans text-slate-800 antialiased;
+    font-size: 16px;
+    line-height: 1.7;
+    font-variant-numeric: tabular-nums;
   }
   ::selection {
     @apply bg-indigo-100 text-indigo-900;
