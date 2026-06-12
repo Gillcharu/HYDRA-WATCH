@@ -23,14 +23,30 @@ export function PipelineFlow() {
               transition={{ delay: i * 0.08 }}
               className="group relative flex flex-col items-center px-3 md:px-5"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white font-mono text-sm font-bold text-teal-600 shadow-sm transition group-hover:border-teal-500 group-hover:shadow-md">
+              <div 
+                className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white font-mono text-sm font-bold text-teal-600 shadow-sm transition group-hover:border-teal-500 group-hover:shadow-md"
+                style={{ color: "#0d9488", backgroundColor: "#ffffff" }}
+              >
                 {step.icon}
               </div>
-              <span className="mt-2 text-xs font-bold text-slate-800">{step.label}</span>
-              <span className="mt-0.5 hidden text-[10px] text-slate-500 sm:block">{step.desc}</span>
+              <span 
+                className="mt-2 text-xs font-bold text-slate-800"
+                style={{ color: "#1e293b" }}
+              >
+                {step.label}
+              </span>
+              <span 
+                className="mt-0.5 hidden text-[10px] text-slate-500 sm:block"
+                style={{ color: "#64748b" }}
+              >
+                {step.desc}
+              </span>
             </motion.div>
             {i < STEPS.length - 1 && (
-              <div className="hidden h-px w-8 bg-slate-200 md:block lg:w-12" />
+              <div 
+                className="hidden h-px w-8 bg-slate-200 md:block lg:w-12"
+                style={{ backgroundColor: "#e2e8f0" }}
+              />
             )}
           </div>
         ))}
