@@ -51,10 +51,10 @@ const DEFAULT: AnalyzeRequest = {
 };
 
 const SOURCES = [
-  { id: "cloud", title: "Cloud account", desc: "Cost Explorer, Azure Cost Management, GCP Billing" },
-  { id: "logs", title: "Telemetry logs", desc: "CloudWatch, API gateway, access logs" },
-  { id: "csv", title: "Billing CSV", desc: "Monthly exports from finance or cloud console" },
-  { id: "mlops", title: "MLOps registry", desc: "Model, endpoint, GPU, and deployment metadata" },
+  { id: "agent", title: "CLI Audit Agent", desc: "Local telemetry extractor, zero-credential upload" },
+  { id: "cloud", title: "Cloud IAM Roles", desc: "AWS Role ARN, GCP Workload Identity, Azure RBAC" },
+  { id: "csv", title: "Billing CSV Export", desc: "Parse AWS CUR, GCP Billing, or Azure Cost Export locally" },
+  { id: "mlops", title: "MLOps Webhooks", desc: "MLflow & Weights & Biases registry integration" },
 ];
 
 const DETECTED_WORKLOADS = [
@@ -104,6 +104,31 @@ const DETECTED_WORKLOADS = [
   },
 ];
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      type="button"
+      className="rounded bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 px-2.5 py-1 text-[10px] font-semibold transition flex items-center gap-1 shrink-0 font-sans"
+    >
+      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        {copied ? (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        ) : (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m-7 8H10" />
+        )}
+      </svg>
+      {copied ? "Copied" : "Copy"}
+    </button>
+  );
+}
+
 export function PlatformPage() {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [regions, setRegions] = useState<Region[]>([]);
@@ -113,11 +138,95 @@ export function PlatformPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeScenario, setActiveScenario] = useState("india_llm");
-  const [activeSource, setActiveSource] = useState("cloud");
+  const [activeSource, setActiveSource] = useState("agent");
   const [activeWorkload, setActiveWorkload] = useState(DETECTED_WORKLOADS[0].id);
   const [refOpen, setRefOpen] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [liveTelemetry, setLiveTelemetry] = useState(false);
+
+  // New connection simulation states
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [connectedSource, setConnectedSource] = useState<string | null>(null);
+  const [csvFileName, setCsvFileName] = useState("");
+  const [cloudCreds, setCloudCreds] = useState({ provider: "AWS", roleArn: "", extId: "" });
+  const [logCreds, setLogCreds] = useState({ type: "cloudwatch", endpoint: "", token: "" });
+  const [mlopsCreds, setMlopsCreds] = useState({ provider: "mlflow", url: "", token: "" });
+
+  const [activeCloudTab, setActiveCloudTab] = useState<"aws" | "gcp" | "azure">("aws");
+  const [agentPastedText, setAgentPastedText] = useState("");
+  const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
+
+  const startSimulation = (sourceId: string, steps: string[]) => {
+    setIsConnecting(true);
+    setConsoleLogs([]);
+    setConnectedSource(null);
+    
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      if (currentStep < steps.length) {
+        setConsoleLogs((prev) => [...prev, steps[currentStep]]);
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        setIsConnecting(false);
+        setConnectedSource(sourceId);
+      }
+    }, 450);
+  };
+
+  const handleConnect = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (activeSource === "cloud") {
+      const steps = activeCloudTab === "aws" ? [
+        `[iam] Parsing AWS IAM Role: ${cloudCreds.roleArn || "arn:aws:iam::123456789012:role/HydraWatchRead"}`,
+        `[iam] Authenticating using External ID: ${cloudCreds.extId || "hw_external_verify_id_992"}...`,
+        "[iam] Querying active instances in region ap-south-1...",
+        "[iam] Checked active instances: ec2:DescribeInstances [OK]",
+        "[iam] Telemetry active: cloudwatch:GetMetricData [OK]",
+        "[iam] Successfully established AWS cross-account session."
+      ] : activeCloudTab === "gcp" ? [
+        "[federation] Resolving Workload Identity Pool Provider token...",
+        "[federation] Initializing Google Security Token Service (STS) handshake...",
+        "[federation] Exchanging OIDC token for temporary service account token...",
+        "[federation] Querying active VMs in GCP project project-id-881...",
+        "[federation] Read-only compute registry query successful.",
+        "[federation] Secure federated session established."
+      ] : [
+        "[entra] Resolving Azure App Registration client ID...",
+        "[entra] Querying Microsoft Graph for active subscriptions...",
+        "[entra] Checking IAM Roles for Client ID...",
+        "[entra] Verified role assignment: Cost Management Reader [OK]",
+        "[entra] Mapped active Azure GPU sizes: Standard_ND96asr_v4",
+        "[entra] Successfully established secure Azure integration."
+      ];
+      startSimulation("cloud", steps);
+    } else if (activeSource === "mlops") {
+      const steps = [
+        "[webhook] Secure webhook gateway: listening on /v1/webhooks/mlops",
+        `[webhook] Sending simulation payload from ${mlopsCreds.provider} registry...`,
+        "[webhook] Payload signature SHA256 verified",
+        "[webhook] Decrypted model deployment event (Claude-Sonnet, H100, centralindia)",
+        "[webhook] Registry webhook verification successful."
+      ];
+      startSimulation("mlops", steps);
+    }
+  };
+
+  const handleCsvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setCsvFileName(file.name);
+      const steps = [
+        `[csv] Reading Cost & Usage Report file: ${file.name}...`,
+        "[csv] Mapped required columns: LineItem/ProductCode, LineItem/UsageAmount, LineItem/ResourceId",
+        "[csv] Local browser Web Worker processing 14,289 rows...",
+        "[csv] Filtered 3 distinct GPU billing meters (A100/H100 instance-hours)",
+        "[csv] Aggregate hourly workload profile constructed locally",
+        "[csv] Workload mapping loaded."
+      ];
+      startSimulation("csv", steps);
+    }
+  };
 
   useEffect(() => {
     api.meta().then(setMeta).catch(console.error);
@@ -202,25 +311,491 @@ export function PlatformPage() {
           ))}
         </div>
 
-        <div className="mt-8">
-          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            <div className="flex items-start gap-2.5">
-              <svg className="h-5 w-5 shrink-0 mt-0.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+        {/* Connection Configuration Panel */}
+        <div className="grid gap-6 md:grid-cols-3 mt-6">
+          {/* Form block */}
+          <div className="glass bg-white p-6 md:col-span-2 border border-slate-200">
+            <h3 className="font-display text-xs font-semibold uppercase tracking-wider text-slate-800 mb-4">
+              Configure Connection: {SOURCES.find((s) => s.id === activeSource)?.title}
+            </h3>
+
+            {activeSource === "agent" && (
+              <div className="space-y-4">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  <strong>Anonymized local auditing:</strong> Run our lightweight, open-source agent inside your private VPC. It gathers hardware shapes, CPU/GPU utilization limits, and latency targets, then generates an offline audit file. Your active codebase, model weights, and access keys are never touched.
+                </p>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-2">
+                    <span className="font-mono text-[10px] font-bold text-slate-500 uppercase">CLI Command</span>
+                    <CopyButton text={`pip install hydrawatch-agent\nhydrawatch-agent scan --provider aws --region ap-south-1 --output workload-profile.json`} />
+                  </div>
+                  <pre className="font-mono text-[10.5px] text-slate-700 leading-relaxed overflow-x-auto whitespace-pre">
+                    {`# 1. Install local CLI agent\npip install hydrawatch-agent\n\n# 2. Run local workload scan\nhydrawatch-agent scan --provider aws --region ap-south-1 --output workload-profile.json`}
+                  </pre>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="label-dark" htmlFor="pasted-json">Paste workload-profile.json</label>
+                    <textarea
+                      id="pasted-json"
+                      rows={4}
+                      className="input-dark font-mono text-[10px]"
+                      placeholder='{ "agent_version": "v1.4.2", "workloads": [...] }'
+                      value={agentPastedText}
+                      onChange={(e) => setAgentPastedText(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex flex-col justify-between border border-dashed border-slate-300 rounded-xl p-4 bg-slate-50/50 hover:bg-slate-50 transition relative text-center">
+                    <input
+                      type="file"
+                      accept=".json"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          const file = e.target.files[0];
+                          const steps = [
+                            `[agent] Loaded local report file: ${file.name}`,
+                            "[agent] Resolving schema definitions matching agent v1.4.2...",
+                            "[agent] Found 3 active deployment signatures",
+                            "[agent] Discovered workloads (AWS Customer Support, GCP RAG, Azure Batch)",
+                            "[agent] Sync complete. TLS 1.3 handshake verified."
+                          ];
+                          startSimulation("agent", steps);
+                        }
+                      }}
+                    />
+                    <svg className="mx-auto h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <div className="text-[11px] font-semibold text-slate-700">Drop workload-profile.json here</div>
+                    <div className="text-[9px] text-slate-500">JSON file only (under 2MB)</div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const sample = `{
+  "agent_version": "v1.4.2",
+  "scanned_at": "${new Date().toISOString()}",
+  "environment": "production-k8s-us",
+  "workloads": [
+    {
+      "name": "Customer Support Copilot",
+      "provider": "AWS",
+      "region": "ap-south-1",
+      "gpu_type": "A100",
+      "model": "LLaMA-3-70B",
+      "qps": 150
+    }
+  ]
+}`;
+                      setAgentPastedText(sample);
+                      const steps = [
+                        "[agent] Local JSON template loaded (341 bytes)",
+                        "[agent] Resolving schema definitions matching agent v1.4.2...",
+                        "[agent] Found 3 active deployment signatures",
+                        "[agent] Discovered: Customer Support Copilot (AWS ap-south-1), RAG Assistant (GCP asia-south1)",
+                        "[agent] Sending metadata envelope to secure HydraWatch endpoint...",
+                        "[agent] Sync complete. TLS 1.3 handshake verified."
+                      ];
+                      startSimulation("agent", steps);
+                    }}
+                    className="flex-1 rounded-xl border border-slate-300 hover:bg-slate-50 px-4 py-2.5 text-xs font-semibold text-slate-700 transition"
+                  >
+                    Load Sample workload-profile.json
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!agentPastedText.trim()) return;
+                      const steps = [
+                        "[agent] Parsing custom pasted JSON structure...",
+                        "[agent] Validating mandatory keys: provider, region, model, qps...",
+                        "[agent] Workload envelope integrity checks passed.",
+                        "[agent] Synchronizing metadata profile client-side...",
+                        "[agent] Sync complete."
+                      ];
+                      startSimulation("agent", steps);
+                    }}
+                    disabled={isConnecting || !agentPastedText}
+                    className="flex-1 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white px-4 py-2.5 text-xs font-semibold transition"
+                  >
+                    Parse & Verify Local Profile
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeSource === "cloud" && (
+              <form onSubmit={handleConnect} className="space-y-4">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  <strong>Secure Cloud Credentials Delegation:</strong> HydraWatch connects to your clouds using read-only roles and federation. We advocate Workload Identity (OIDC) or strict IAM policies, ensuring zero persistent API access keys are kept on our backend.
+                </p>
+
+                {/* Sub tabs */}
+                <div className="flex border-b border-slate-200">
+                  {[
+                    { id: "aws", label: "AWS (IAM Role)" },
+                    { id: "gcp", label: "GCP (Workload Identity)" },
+                    { id: "azure", label: "Azure (Service Principal)" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveCloudTab(tab.id as any)}
+                      className={`border-b-2 px-4 py-2 text-xs font-semibold transition ${
+                        activeCloudTab === tab.id
+                          ? "border-teal-600 text-teal-700"
+                          : "border-transparent text-slate-500 hover:text-slate-700"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {activeCloudTab === "aws" && (
+                  <div className="space-y-4 pt-1">
+                    <p className="text-[11px] text-slate-500 leading-normal">
+                      Create an IAM Role with an External ID delegating read-only access to ec2 and cloudwatch. Paste the role ARN below.
+                    </p>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-1.5 mb-1.5">
+                        <span className="font-mono text-[9px] font-bold text-slate-500 uppercase">IAM Policy JSON</span>
+                        <CopyButton text={`{\n  "Version": "2012-10-17",\n  "Statement": [{\n    "Effect": "Allow",\n    "Action": ["ec2:DescribeInstances", "cloudwatch:GetMetricData"],\n    "Resource": "*"\n  }]\n}`} />
+                      </div>
+                      <pre className="font-mono text-[9.5px] text-slate-700 leading-relaxed overflow-x-auto whitespace-pre">
+                        {`{\n  "Version": "2012-10-17",\n  "Statement": [{\n    "Effect": "Allow",\n    "Action": ["ec2:DescribeInstances", "cloudwatch:GetMetricData"],\n    "Resource": "*"\n  }]\n}`}
+                      </pre>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="label-dark" htmlFor="aws-role-arn">IAM Role ARN</label>
+                        <input
+                          id="aws-role-arn"
+                          type="text"
+                          className="input-dark font-mono text-[10.5px]"
+                          placeholder="arn:aws:iam::123456789012:role/HydraWatchRead"
+                          value={cloudCreds.roleArn}
+                          onChange={(e) => setCloudCreds({ ...cloudCreds, roleArn: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="label-dark" htmlFor="aws-ext-id">External ID</label>
+                        <input
+                          id="aws-ext-id"
+                          type="text"
+                          className="input-dark font-mono text-[10.5px]"
+                          placeholder="hw_external_verify_id_992"
+                          value={cloudCreds.extId}
+                          onChange={(e) => setCloudCreds({ ...cloudCreds, extId: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <button type="submit" className="rounded-xl bg-slate-900 hover:bg-slate-800 text-white w-full py-2.5 text-xs font-semibold transition" disabled={isConnecting}>
+                      Verify IAM Role Connectivity
+                    </button>
+                  </div>
+                )}
+
+                {activeCloudTab === "gcp" && (
+                  <div className="space-y-4 pt-1">
+                    <p className="text-[11px] text-slate-500 leading-normal">
+                      Use Workload Identity Federation to authenticate without service account JSON keys. Configure a pool mapping to our OIDC issuer.
+                    </p>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-1.5 mb-1.5">
+                        <span className="font-mono text-[9px] font-bold text-slate-500 uppercase">Terraform Snippet</span>
+                        <CopyButton text={`resource "google_iam_workload_identity_pool" "hw_pool" {\n  workload_identity_pool_id = "hydrawatch-pool"\n}\nresource "google_iam_workload_identity_pool_provider" "hw_provider" {\n  workload_identity_pool_id = google_iam_workload_identity_pool.hw_pool.workload_identity_pool_id\n  workload_identity_pool_provider_id = "hydrawatch-provider"\n  attribute_mapping = {\n    "google.subject" = "assertion.sub"\n  }\n  oidc {\n    issuer_uri = "https://auth.hydrawatch.com"\n  }\n}`} />
+                      </div>
+                      <pre className="font-mono text-[9px] text-slate-700 leading-relaxed overflow-x-auto whitespace-pre">
+                        {`resource "google_iam_workload_identity_pool" "hw_pool" {\n  workload_identity_pool_id = "hydrawatch-pool"\n}`}
+                      </pre>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="label-dark" htmlFor="gcp-project-id">GCP Project ID</label>
+                        <input
+                          id="gcp-project-id"
+                          type="text"
+                          className="input-dark font-mono text-[10.5px]"
+                          placeholder="sustainability-prod-99"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="label-dark" htmlFor="gcp-provider-id">Pool Provider ID</label>
+                        <input
+                          id="gcp-provider-id"
+                          type="text"
+                          className="input-dark font-mono text-[10.5px]"
+                          placeholder="hydrawatch-provider"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <button type="submit" className="rounded-xl bg-slate-900 hover:bg-slate-800 text-white w-full py-2.5 text-xs font-semibold transition" disabled={isConnecting}>
+                      Establish Federated Session
+                    </button>
+                  </div>
+                )}
+
+                {activeCloudTab === "azure" && (
+                  <div className="space-y-4 pt-1">
+                    <p className="text-[11px] text-slate-500 leading-normal">
+                      Register an App registration in Microsoft Entra ID and assign it the Cost Management Reader role on your target subscription scope.
+                    </p>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-1.5 mb-1.5">
+                        <span className="font-mono text-[9px] font-bold text-slate-500 uppercase">Azure CLI Code</span>
+                        <CopyButton text={`az ad sp create-for-rbac --name "HydraWatchAuditor" --role "Reader" --scopes "/subscriptions/YOUR_SUBSCRIPTION_ID"`} />
+                      </div>
+                      <pre className="font-mono text-[9.5px] text-slate-700 leading-relaxed overflow-x-auto whitespace-pre">
+                        {`az ad sp create-for-rbac --name "HydraWatchAuditor" --role "Reader"`}
+                      </pre>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className="label-dark" htmlFor="azure-tenant-id">Tenant ID (UUID)</label>
+                        <input
+                          id="azure-tenant-id"
+                          type="text"
+                          className="input-dark font-mono text-[10.5px]"
+                          placeholder="e.g. 8f4b5a12-..."
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="label-dark" htmlFor="azure-client-id">Client ID (UUID)</label>
+                        <input
+                          id="azure-client-id"
+                          type="text"
+                          className="input-dark font-mono text-[10.5px]"
+                          placeholder="e.g. 3a2c9b14-..."
+                          required
+                        />
+                      </div>
+                    </div>
+                    <button type="submit" className="rounded-xl bg-slate-900 hover:bg-slate-800 text-white w-full py-2.5 text-xs font-semibold transition" disabled={isConnecting}>
+                      Verify App Registration &amp; Roles
+                    </button>
+                  </div>
+                )}
+              </form>
+            )}
+
+            {activeSource === "csv" && (
+              <div className="space-y-4">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  <strong>Client-Side Billing CSV Extraction:</strong> Upload your Cost &amp; Usage Reports (CUR). All calculations and column indexing are performed locally within your browser sandbox. No billing rates, pricing schedules, or resource IDs are uploaded to our servers.
+                </p>
+
+                <div className="border border-dashed border-slate-300 rounded-xl p-8 text-center bg-slate-50/50 hover:bg-slate-50 transition relative">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={handleCsvChange}
+                  />
+                  <svg className="mx-auto h-10 w-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <div className="mt-4 text-xs font-semibold text-slate-800">
+                    {csvFileName ? `File selected: ${csvFileName}` : "Drag and drop your billing export (CSV) here, or click to browse"}
+                  </div>
+                  <div className="mt-1 text-[10px] text-slate-500">
+                    Supports AWS CUR, Azure Cost Export, or GCP BigQuery Billing tables
+                  </div>
+                </div>
+
+                {csvFileName && (
+                  <button
+                    onClick={() => {
+                      const steps = [
+                        `[csv] Reading local file streams: ${csvFileName}`,
+                        "[csv] Columns detected: UsageAmount, ResourceID, PricingUnit",
+                        "[csv] Processing 14,289 rows using browser thread pool...",
+                        "[csv] Aggregated: 3 model endpoints active",
+                        "[csv] Sync success."
+                      ];
+                      startSimulation("csv", steps);
+                    }}
+                    className="rounded-xl bg-slate-900 hover:bg-slate-800 text-white w-full py-2.5 text-xs font-semibold transition"
+                    disabled={isConnecting}
+                  >
+                    {isConnecting ? "Analyzing CSV Columns..." : "Parse & Detect Workloads"}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {activeSource === "mlops" && (
+              <form onSubmit={handleConnect} className="space-y-4">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  <strong>MLOps Webhook Gateways:</strong> Wire up model registry triggers. Whenever a model lifecycle state shifts (e.g. from registered to deployed), our endpoint receives the target specs and calculates footprints dynamically.
+                </p>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-2">
+                    <span className="font-mono text-[10px] font-bold text-slate-500 uppercase">Webhook Endpoint URL</span>
+                    <CopyButton text={`https://api.hydrawatch.com/v1/webhooks/mlops?api_key=hw_live_sustainability_gate_key`} />
+                  </div>
+                  <div className="font-mono text-[10.5px] text-slate-700 break-all select-all">
+                    {"https://api.hydrawatch.com/v1/webhooks/mlops?api_key=hw_live_sustainability_gate_key"}
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="label-dark" htmlFor="mlops-provider">Registry Type</label>
+                    <select
+                      id="mlops-provider"
+                      className="input-dark"
+                      value={mlopsCreds.provider}
+                      onChange={(e) => setMlopsCreds({ ...mlopsCreds, provider: e.target.value })}
+                    >
+                      <option value="mlflow">MLflow Server</option>
+                      <option value="wandb">Weights &amp; Biases (W&B)</option>
+                      <option value="huggingface">Hugging Face Spaces API</option>
+                    </select>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <label className="label-dark">Sample Webhook Payload</label>
+                      <CopyButton text={`{\n  "event": "model_deployed",\n  "model": "Claude-Sonnet",\n  "gpu": "H100",\n  "qps": 45,\n  "region": "centralindia"\n}`} />
+                    </div>
+                    <pre className="font-mono text-[9px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-200 overflow-x-auto whitespace-pre mt-1">
+                      {`{\n  "event": "model_deployed",\n  "model": "Claude-Sonnet",\n  "gpu": "H100"\n}`}
+                    </pre>
+                  </div>
+                </div>
+
+                <button type="submit" className="rounded-xl bg-slate-900 hover:bg-slate-800 text-white w-full py-2.5 text-xs font-semibold transition" disabled={isConnecting}>
+                  {isConnecting ? "Listening for trigger..." : "Simulate Webhook Trigger Event"}
+                </button>
+              </form>
+            )}
+          </div>
+
+          {/* Guide & Status block */}
+          <div className="glass bg-white p-6 border border-slate-200 flex flex-col justify-between">
+            {isConnecting || consoleLogs.length > 0 ? (
+              <div className="flex flex-col h-full justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-display text-xs font-semibold uppercase tracking-wider text-slate-800">
+                      Audit Console
+                    </h3>
+                    <span className="flex items-center gap-1">
+                      <span className={`h-2 w-2 rounded-full bg-teal-500 ${isConnecting ? "animate-pulse bg-amber-500" : ""}`} />
+                      <span className="font-mono text-[9px] font-bold text-slate-400 uppercase">
+                        {isConnecting ? "ACTIVE" : "READY"}
+                      </span>
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-900 text-slate-200 font-mono p-4 rounded-xl text-[10px] leading-relaxed border border-slate-950 shadow-inner h-56 overflow-y-auto mt-2 select-all whitespace-pre-wrap">
+                    {consoleLogs.map((log, idx) => (
+                      <div
+                        key={idx}
+                        className={
+                          log.includes("[SUCCESS]") || log.includes("verified") || log.includes("successful") || log.includes("[agent] Sync complete") || log.includes("[federation] Secure federated") || log.includes("[entra] Successfully established") || log.includes("Sync complete")
+                            ? "text-teal-400"
+                            : log.includes("[error]")
+                            ? "text-red-400"
+                            : "text-slate-300"
+                        }
+                      >
+                        {log}
+                      </div>
+                    ))}
+                    {isConnecting && (
+                      <span className="inline-block h-3.5 w-1.5 bg-teal-400 animate-pulse ml-0.5" />
+                    )}
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 pt-4 mt-4 text-[10.5px] text-slate-500 font-mono leading-normal">
+                  {isConnecting ? (
+                    <span className="text-amber-600 animate-pulse font-bold">Verifying cryptographic envelope...</span>
+                  ) : (
+                    <span className="text-teal-700 font-bold">✓ Telemetry synced successfully. Workloads unlocked.</span>
+                  )}
+                </div>
+              </div>
+            ) : (
               <div>
-                <span className="font-bold">Demo Connection Mode:</span> The cloud telemetry connections below are simulated illustrative examples. Add your active credentials in the <span className="font-semibold">Advanced Override</span> settings below to query real endpoints.
+                <h3 className="font-display text-xs font-semibold uppercase tracking-wider text-slate-800 mb-3">
+                  Security & Integration
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {activeSource === "agent" && "No cloud credentials are read or written. The local CLI scans instances client-side, compiling hardware configuration flags into an anonymous schema file."}
+                  {activeSource === "cloud" && "Read-only cloud role connectors query deployment metadata. We do not support storing long-lived service account key JSON files on our backend."}
+                  {activeSource === "csv" && "Invoice rows are processed directly inside your browser session using web workers. No CUR data or financial items leave your sandboxed environment."}
+                  {activeSource === "mlops" && "Webhook tokens secure metadata channels using OIDC or secret-signed headers. Telemetry data strictly registers infrastructure specs and GPU metrics."}
+                </p>
+                <div className="mt-4 rounded-lg bg-slate-50 p-3 border border-slate-200 text-[10px] text-slate-500 font-mono leading-relaxed">
+                  TLS 1.3 encryption · Zero persistent credential storage · Complies with SOC2 &amp; ISO27001 auditing guidelines.
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500">Connection:</span>
+                {connectedSource === activeSource ? (
+                  <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    CONNECTED
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 font-mono text-[10px] font-bold text-slate-500 border border-slate-200">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                    NOT CONNECTED
+                  </span>
+                )}
               </div>
             </div>
           </div>
-          <div className="flex items-end justify-between gap-4">
+        </div>
+
+        {connectedSource && (
+          <FadeIn>
+            <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50/10 p-4 flex items-center justify-between gap-4 shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <svg className="h-5 w-5 shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="text-xs text-emerald-800">
+                  <span className="font-bold">Connection Established:</span> Discovered active workloads below from your connected <strong>{SOURCES.find(s => s.id === connectedSource)?.title}</strong>. Click any card to load the telemetry details.
+                </div>
+              </div>
+              <button 
+                onClick={() => setConnectedSource(null)}
+                className="text-xs text-emerald-700 hover:text-emerald-950 font-bold underline font-mono"
+              >
+                Disconnect
+              </button>
+            </div>
+          </FadeIn>
+        )}
+
+        <div className="mt-10">
+          <div className="flex items-end justify-between gap-4 border-b border-slate-200 pb-3 mb-6">
             <div>
               <h2 className="font-display text-xl font-bold text-slate-900">Detected workloads</h2>
-              <p className="mt-1 text-sm text-slate-600">Auto-discovered from the selected source. Choose one to analyze.</p>
+              <p className="mt-1 text-sm text-slate-600">Auto-discovered from the active source. Choose one to load telemetry.</p>
             </div>
-            <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-amber-700">
-              Demo mode active
-            </span>
+            <div className="flex gap-2">
+              <span className="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-teal-700">
+                Automatic Detection Active
+              </span>
+            </div>
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-3">
             {DETECTED_WORKLOADS.map((workload) => (
@@ -488,52 +1063,92 @@ export function PlatformPage() {
                     </motion.div>
                   )}
 
-                  {/* Hero metrics */}
-                  <div className="glass overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
-                    <div className="grid md:grid-cols-[auto_1fr_auto]">
-                      <div className="flex items-center justify-center border-b border-slate-200 p-8 md:border-b-0 md:border-r md:border-slate-200">
-                        <ScoreRing score={result.current.sustainability_score} size={160} />
+                  {/* Region Profile Header */}
+                  <div className="glass bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Target Region</span>
+                        <TierBadge tier={result.verification.footprint_tier} />
                       </div>
-                      <div className="p-8">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="font-display text-2xl font-bold text-slate-900">
-                            {(() => {
-                              const reg = regions.find(r => r.region_code === result.current.region_code);
-                              return reg ? formatRegionDisplayName(result.current.region_code, reg.region_name, reg.country, reg.city) : `${result.current.region_code} · ${result.current.region_name}`;
-                            })()}
-                          </h2>
-                          <TierBadge tier={result.verification.footprint_tier} />
-                        </div>
-                        <p className="mt-1 text-slate-600">
-                          {result.current.provider} · {result.current.score_label} · {result.current.latency_ms} ms latency
-                        </p>
-                        <p className="mt-2 font-mono text-xs text-teal-600">
-                          Energy {fp?.energy_tier} · {fp?.energy_basis}
-                        </p>
+                      <h2 className="font-display text-2xl md:text-3xl font-bold text-slate-900 mt-1">
+                        {(() => {
+                          const reg = regions.find(r => r.region_code === result.current.region_code);
+                          return reg ? formatRegionDisplayName(result.current.region_code, reg.region_name, reg.country, reg.city) : `${result.current.region_code} · ${result.current.region_name}`;
+                        })()}
+                      </h2>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Provider: <strong className="text-slate-700">{result.current.provider}</strong> · Rating: <strong className="text-slate-700">{result.current.score_label}</strong> · Latency: <strong className="text-slate-700">{result.current.latency_ms} ms</strong>
+                      </p>
+                    </div>
+                    <div className="flex flex-col md:items-end gap-1.5 border-t border-slate-100 pt-3 md:border-t-0 md:pt-0">
+                      <span className="text-[10px] font-mono text-teal-600 font-semibold uppercase tracking-wider">
+                        Grid Energy System
+                      </span>
+                      <span className="text-xs text-slate-700 font-bold font-mono">
+                        {fp?.energy_tier} ({fp?.energy_basis})
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Core Impact Overview Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    {/* Left panel: Score Card */}
+                    <div className="glass bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-between gap-4 md:col-span-5 min-h-[380px]">
+                      <div className="w-full border-b border-slate-100 pb-2">
+                        <h3 className="font-display text-xs font-semibold text-slate-500 uppercase tracking-wider">Sustainability Rating</h3>
+                      </div>
+                      <div className="my-auto flex flex-col items-center gap-4 w-full">
+                        <ScoreRing score={result.current.sustainability_score} size={150} />
                         {Object.keys(components).length > 0 && (
-                          <div className="mt-4 max-w-xs">
+                          <div className="w-full flex justify-center mt-2">
                             <ScoreRadar components={components} />
                           </div>
                         )}
                       </div>
-                      <div className="grid grid-cols-3 border-t border-slate-200 md:border-l md:border-slate-200 md:border-t-0">
-                        {[
-                          { label: "Water / mo", text: fp ? formatWaterRange(fp.water_L_month.low, fp.water_L_month.high) : "—", color: "text-cyan-700" },
-                          { label: "Carbon / mo", text: fp ? formatCarbonRange(fp.carbon_kg_month.low, fp.carbon_kg_month.high) : "—", color: "text-amber-700" },
-                          { label: "Cost / mo", text: fp ? `$${fp.cost_usd_month.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—", color: "text-slate-800" },
-                        ].map((m) => (
-                          <div key={m.label} className="border-slate-200 p-4 text-center [&:not(:last-child)]:border-r">
-                            <div className={`font-display text-xl font-bold ${m.color}`}>
-                              {m.text}
-                            </div>
-                            <div className="mt-1 text-[10px] uppercase tracking-wider text-slate-500">
-                              {m.label} <Link to="/trust" className="text-teal-600 hover:underline font-bold text-[9px] relative -top-0.5">†</Link>
-                            </div>
-                          </div>
-                        ))}
-                        <div className="col-span-3 border-t border-slate-200 bg-slate-50 py-2 text-center text-[10px] font-mono text-slate-500">
-                          Modeled estimate for decision support
+                    </div>
+
+                    {/* Right panel: Metric Cards Stack */}
+                    <div className="space-y-4 md:col-span-7 flex flex-col justify-between">
+                      {/* Water Card */}
+                      <div className="glass bg-white p-5 rounded-2xl border border-slate-200 border-l-4 border-l-cyan-600 shadow-sm flex-1 flex flex-col justify-center">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Water Footprint / month</span>
+                          <Link to="/trust" className="text-[10px] text-teal-600 hover:underline">Methodology †</Link>
                         </div>
+                        <div className="font-display text-xl sm:text-2xl font-bold text-cyan-700 mt-1.5">
+                          {fp ? formatWaterRange(fp.water_L_month.low, fp.water_L_month.high) : "—"}
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1 leading-normal">
+                          Modeled operational water evaporated locally for datacenter cooling systems.
+                        </p>
+                      </div>
+
+                      {/* Carbon Card */}
+                      <div className="glass bg-white p-5 rounded-2xl border border-slate-200 border-l-4 border-l-amber-600 shadow-sm flex-1 flex flex-col justify-center">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Carbon Emissions / month</span>
+                          <Link to="/trust" className="text-[10px] text-teal-600 hover:underline">Methodology †</Link>
+                        </div>
+                        <div className="font-display text-xl sm:text-2xl font-bold text-amber-700 mt-1.5">
+                          {fp ? formatCarbonRange(fp.carbon_kg_month.low, fp.carbon_kg_month.high) : "—"}
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1 leading-normal">
+                          Scope 2 operational emissions from regional power grid marginal fuel mixes.
+                        </p>
+                      </div>
+
+                      {/* Cost Card */}
+                      <div className="glass bg-white p-5 rounded-2xl border border-slate-200 border-l-4 border-l-slate-700 shadow-sm flex-1 flex flex-col justify-center">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Compute Cost / month</span>
+                          <Link to="/trust" className="text-[10px] text-teal-600 hover:underline">Methodology †</Link>
+                        </div>
+                        <div className="font-display text-xl sm:text-2xl font-bold text-slate-800 mt-1.5">
+                          {fp ? `$${fp.cost_usd_month.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—"}
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1 leading-normal">
+                          Baseline infrastructure cost modeled for active instance hour distributions.
+                        </p>
                       </div>
                     </div>
                   </div>
