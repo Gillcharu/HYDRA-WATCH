@@ -18,8 +18,7 @@ export function PipelineFlow() {
           <div key={step.id} className="flex items-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.08 }}
               className="group relative flex flex-col items-center px-3 md:px-5"
             >
