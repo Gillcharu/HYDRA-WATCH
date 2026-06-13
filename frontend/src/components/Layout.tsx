@@ -128,9 +128,7 @@ export function Layout() {
             <p className="mt-3 text-sm text-slate-600">
               v3.0 · MLPerf energy · IEA/eGRID carbon · V0–V4 trust tiers · MIT License
             </p>
-            <p className="mt-2 text-xs text-slate-500 leading-normal">
-              Built by Charu Gill · B.Tech CS/AI, JUIT · <a href="mailto:241033061@juitsolan.in" className="underline hover:text-slate-900">241033061@juitsolan.in</a>
-            </p>
+
             <div className="mt-4 flex gap-4 text-xs text-slate-600">
               <a href="https://github.com/Gillcharu/HYDRA-WATCH" target="_blank" rel="noreferrer" className="hover:text-slate-900">Feedback / GitHub</a>
             </div>
