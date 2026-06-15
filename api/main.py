@@ -16,7 +16,7 @@ from fastapi import FastAPI, HTTPException, Query, Header, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 import time
 import httpx
 
@@ -62,10 +62,15 @@ from hydrawatch.wue_data import get_wue  # noqa: E402
 from sqlalchemy.orm import Session  # noqa: E402
 from hydrawatch.database import init_db, get_db, GeocodeCache, SavedEstimate  # noqa: E402
 
+ENABLE_API_DOCS = os.environ.get("HYDRAWATCH_ENABLE_API_DOCS", "false").lower() in {"1", "true", "yes"}
+
 app = FastAPI(
     title="HydraWatch API",
     description="Sustainability analysis API for AI infrastructure — powers hydrawatch.com",
     version="3.0.0",
+    docs_url="/docs" if ENABLE_API_DOCS else None,
+    redoc_url="/redoc" if ENABLE_API_DOCS else None,
+    openapi_url="/openapi.json" if ENABLE_API_DOCS else None,
 )
 
 @app.on_event("startup")
@@ -82,9 +87,32 @@ allowed_origins = [o.strip() for o in allowed_origins_str.split(",") if o.strip(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "X-API-Key"],
 )
+
+
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com data:; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self' https://challenges.cloudflare.com; "
+        "frame-src https://challenges.cloudflare.com; "
+        "base-uri 'self'; "
+        "frame-ancestors 'none'"
+    )
+    if "server" in response.headers:
+        del response.headers["server"]
+    return response
 
 
 # Simple sliding window rate limit database (client_ip -> list of request timestamps)
@@ -181,20 +209,7 @@ async def rate_limit_middleware(request: Request, call_next):
                 endpoint_history.append(now)
                 ANALYZE_RATE_LIMITS[endpoint_key] = endpoint_history
         
-        # 1. Stricter check for resource-intensive /api/analyze endpoint (max 10 req/min)
-        if request.url.path == "/api/analyze":
-            analyze_history = ANALYZE_RATE_LIMITS.get(client_ip, [])
-            analyze_history = [t for t in analyze_history if now - t < RATE_LIMIT_WINDOW]
-            if len(analyze_history) >= ANALYZE_LIMIT_MAX:
-                logger.warning(f"Analyze endpoint rate limit exceeded for client IP: {client_ip}")
-                return JSONResponse(
-                    status_code=429,
-                    content={"detail": "Rate limit exceeded for analyze endpoint. Max 10 requests per minute."},
-                )
-            analyze_history.append(now)
-            ANALYZE_RATE_LIMITS[client_ip] = analyze_history
-            
-        # 2. General check for all other /api/* endpoints
+        # General check for all /api/* endpoints
         history = RATE_LIMITS.get(client_ip, [])
         history = [t for t in history if now - t < RATE_LIMIT_WINDOW]
         
@@ -227,20 +242,45 @@ async def enforce_expensive_endpoint_key(x_api_key: Optional[str] = Header(None)
 
 
 class AnalyzeRequest(BaseModel):
-    provider: str = Field(..., examples=["AWS"])
-    region_code: str = Field(..., examples=["ap-south-1"])
-    qps: float = Field(100, ge=1)
-    avg_tokens: int = Field(1000, ge=1)
-    gpu_type: str = Field("A100", examples=["A100", "H100", "V100", "T4"])
-    model_name: str = Field("LLaMA-3-70B")
-    user_location: str = Field("Mumbai, India")
+    provider: str = Field(..., min_length=2, max_length=20, examples=["AWS"])
+    region_code: str = Field(..., min_length=2, max_length=64, pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]{1,63}$", examples=["ap-south-1"])
+    qps: float = Field(100, ge=1, le=10000)
+    avg_tokens: int = Field(1000, ge=1, le=200000)
+    gpu_type: str = Field("A100", min_length=1, max_length=40, examples=["A100", "H100", "V100", "T4"])
+    model_name: str = Field("LLaMA-3-70B", min_length=1, max_length=80)
+    user_location: str = Field("Mumbai, India", min_length=2, max_length=120)
     max_latency_ms: int = Field(150, ge=50, le=500)
-    workload_mode: str = Field("inference")
-    data_tb: float = Field(5.0, ge=0)
-    quantization: str = Field("FP16")
-    framework: str = Field("standard")
+    workload_mode: str = Field("inference", pattern=r"^[A-Za-z0-9_-]{1,32}$")
+    data_tb: float = Field(5.0, ge=0, le=10000)
+    quantization: str = Field("FP16", pattern=r"^[A-Za-z0-9_-]{1,16}$")
+    framework: str = Field("standard", pattern=r"^[A-Za-z0-9_-]{1,32}$")
     live_telemetry: Optional[bool] = Field(False)
     turnstile_token: Optional[str] = Field(None, exclude=True)
+
+    @field_validator("provider")
+    @classmethod
+    def validate_provider(cls, value: str) -> str:
+        normalized = value.strip()
+        if normalized.upper() == "AWS":
+            return "AWS"
+        for provider in ALL_PROVIDERS:
+            if provider.casefold() == normalized.casefold():
+                return provider
+        raise ValueError(f"Unsupported provider: {value}")
+
+    @field_validator("gpu_type")
+    @classmethod
+    def validate_gpu_type(cls, value: str) -> str:
+        if value not in GPU_SPECS:
+            raise ValueError(f"Unsupported GPU type: {value}")
+        return value
+
+    @field_validator("model_name")
+    @classmethod
+    def validate_model_name(cls, value: str) -> str:
+        if value not in MODEL_SPECS:
+            raise ValueError(f"Unsupported model name: {value}")
+        return value
 
 
 # ── API routes (registered before SPA catch-all) ─────────────────────────────
@@ -253,7 +293,8 @@ def api_root():
         "version": "3.0.0",
         "regions_total": len(df),
         "providers": sorted(df["provider"].unique().tolist()),
-        "docs": "/docs",
+        "docs": "/docs" if ENABLE_API_DOCS else None,
+        "docs_enabled": ENABLE_API_DOCS,
         "website": "/",
     }
 

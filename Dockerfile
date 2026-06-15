@@ -21,4 +21,4 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 EXPOSE 8080
 
-CMD ["python3", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["python3", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080", "--no-server-header"]

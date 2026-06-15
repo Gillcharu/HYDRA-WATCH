@@ -162,8 +162,9 @@ cp .env.example .env
 | `DATABASE_URL` | SQLAlchemy connection string | `sqlite:///data/hydrawatch.db` |
 | `ELECTRICITY_MAPS_API_KEY` | Optional live carbon-intensity lookup | Static regional fallback |
 | `GOOGLE_MAPS_API_KEY` | Optional geocoding provider | OpenStreetMap/Nominatim fallback |
-| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed frontend origins | `*` |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed frontend origins | `https://hydra-watch.onrender.com,http://localhost:5173,http://localhost:8080` |
 | `LOG_LEVEL` | Backend logging level | `INFO` |
+| `HYDRAWATCH_ENABLE_API_DOCS` | Enable `/docs`, `/redoc`, and `/openapi.json` | `false` |
 | `REDIS_URL` | Optional Redis backend for distributed rate limiting | In-memory limiter |
 | `ANALYZE_RATE_LIMIT_MAX` | Max `/api/analyze` requests per IP per minute | `5` |
 | `HYDRAWATCH_REQUIRE_API_KEY` | Require `X-API-Key` for expensive endpoints | `false` |
@@ -185,7 +186,13 @@ cp .env.example .env
 | `/api/validate/all` | `GET` | Carbon-band validation summary |
 | `/sitemap.xml` | `GET` | Dynamic sitemap |
 
-Interactive API docs are available locally at:
+Interactive API docs are disabled by default in production. For local/internal debugging, set:
+
+```bash
+export HYDRAWATCH_ENABLE_API_DOCS=true
+```
+
+Then API docs are available at:
 
 ```text
 http://localhost:8080/docs
