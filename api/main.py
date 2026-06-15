@@ -6,6 +6,7 @@ import os
 import json
 import logging
 import sys
+from html import escape
 from pathlib import Path
 from typing import Optional
 
@@ -88,9 +89,28 @@ app.add_middleware(
 RATE_LIMITS = {}
 RATE_LIMIT_MAX = 100  # maximum requests per client IP per minute
 RATE_LIMIT_WINDOW = 60  # time window in seconds
+RATE_LIMIT_SWEEP_INTERVAL = 60
+RATE_LIMIT_LAST_SWEEP = 0.0
 
 ANALYZE_RATE_LIMITS = {}
 ANALYZE_LIMIT_MAX = 10  # maximum requests to /api/analyze per client IP per minute
+
+
+def _sweep_rate_limits(now: float) -> None:
+    global RATE_LIMIT_LAST_SWEEP
+    if now - RATE_LIMIT_LAST_SWEEP < RATE_LIMIT_SWEEP_INTERVAL:
+        return
+    for bucket in (RATE_LIMITS, ANALYZE_RATE_LIMITS):
+        stale_keys = []
+        for client_ip, history in bucket.items():
+            fresh = [t for t in history if now - t < RATE_LIMIT_WINDOW]
+            if fresh:
+                bucket[client_ip] = fresh
+            else:
+                stale_keys.append(client_ip)
+        for key in stale_keys:
+            del bucket[key]
+    RATE_LIMIT_LAST_SWEEP = now
 
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
@@ -98,6 +118,7 @@ async def rate_limit_middleware(request: Request, call_next):
     if request.url.path.startswith("/api/"):
         client_ip = request.client.host if request.client else "unknown"
         now = time.time()
+        _sweep_rate_limits(now)
         
         # 1. Stricter check for resource-intensive /api/analyze endpoint (max 10 req/min)
         if request.url.path == "/api/analyze":
@@ -361,9 +382,8 @@ def clusters():
 
 async def get_tenant_context(
     x_api_key: Optional[str] = Header(None),
-    api_key: Optional[str] = Query(None)
 ):
-    key = x_api_key or api_key
+    key = x_api_key
     if key:
         from hydrawatch.db import verify_api_key_db
         context = verify_api_key_db(key)
@@ -472,7 +492,10 @@ def export_kubernetes(regions: str = Query(..., description="Comma-separated reg
     if not region_list:
         raise HTTPException(400, "Must provide at least one valid region")
     from hydrawatch.export import generate_kubernetes_affinity_yaml
-    return {"yaml": generate_kubernetes_affinity_yaml(region_list)}
+    try:
+        return {"yaml": generate_kubernetes_affinity_yaml(region_list)}
+    except ValueError as e:
+        raise HTTPException(400, str(e))
 
 
 @app.get("/api/export/terraform")
@@ -482,7 +505,10 @@ def export_terraform(
     score: float = Query(50.0),
 ):
     from hydrawatch.export import generate_terraform_provider_tf
-    return {"tf": generate_terraform_provider_tf(provider, region, score)}
+    try:
+        return {"tf": generate_terraform_provider_tf(provider, region, score)}
+    except ValueError as e:
+        raise HTTPException(400, str(e))
 
 
 # Legacy routes (backward compatible)
@@ -556,7 +582,7 @@ from fastapi.responses import Response
 
 @app.get("/sitemap.xml")
 def sitemap(request: Request, db: Session = Depends(get_db)):
-    base_url = str(request.base_url).rstrip("/")
+    base_url = os.environ.get("PUBLIC_BASE_URL", "https://hydra-watch.onrender.com").rstrip("/")
     static_routes = [
         "",
         "/platform",
@@ -571,7 +597,7 @@ def sitemap(request: Request, db: Session = Depends(get_db)):
         url = f"{base_url}{route}"
         xml_entries.append(
             f"  <url>\n"
-            f"    <loc>{url}</loc>\n"
+            f"    <loc>{escape(url)}</loc>\n"
             f"    <changefreq>weekly</changefreq>\n"
             f"    <priority>0.8</priority>\n"
             f"  </url>"
@@ -583,7 +609,7 @@ def sitemap(request: Request, db: Session = Depends(get_db)):
             url = f"{base_url}/e/{est.id}"
             xml_entries.append(
                 f"  <url>\n"
-                f"    <loc>{url}</loc>\n"
+                f"    <loc>{escape(url)}</loc>\n"
                 f"    <changefreq>monthly</changefreq>\n"
                 f"    <priority>0.6</priority>\n"
                 f"  </url>"

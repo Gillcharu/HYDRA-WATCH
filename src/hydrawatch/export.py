@@ -2,10 +2,38 @@
 
 from __future__ import annotations
 
+import json
+import re
+
+
+_REGION_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
+_PROVIDER_RE = re.compile(r"^[a-z][a-z0-9_-]{0,31}$")
+
+
+def _validate_region(region: str) -> str:
+    region = region.strip()
+    if not _REGION_RE.fullmatch(region):
+        raise ValueError(f"Invalid cloud region identifier: {region!r}")
+    return region
+
+
+def _validate_provider(provider: str) -> str:
+    provider = provider.strip().lower()
+    if not _PROVIDER_RE.fullmatch(provider):
+        raise ValueError(f"Invalid Terraform provider identifier: {provider!r}")
+    return provider
+
+
+def _hcl_string(value: str) -> str:
+    return json.dumps(value)
+
 
 def generate_kubernetes_affinity_yaml(regions: list[str]) -> str:
     """Generate Kubernetes NodeAffinity policy prioritizing clean cloud regions."""
-    regions_yaml = "\n".join(f"                    - {r}" for r in regions)
+    safe_regions = [_validate_region(r) for r in regions]
+    if not safe_regions:
+        raise ValueError("At least one cloud region is required")
+    regions_yaml = "\n".join(f"                    - {r}" for r in safe_regions)
     return f"""# Kubernetes Deployment with Carbon-Aware Region Scheduling
 # Generated dynamically by HydraWatch Infrastructure Intelligence
 
@@ -52,7 +80,9 @@ spec:
 
 def generate_terraform_provider_tf(provider: str, region: str, score: float) -> str:
     """Generate Terraform configurations pointing to the primary sustainable region."""
-    provider = provider.lower()
+    provider = _validate_provider(provider)
+    region = _validate_region(region)
+    region_hcl = _hcl_string(region)
     if provider == "aws":
         return f"""# Terraform Sustainable AWS Provider Configuration
 # Generated dynamically by HydraWatch Infrastructure Intelligence
@@ -68,7 +98,7 @@ terraform {{
 }}
 
 provider "aws" {{
-  region = "{region}"
+  region = {region_hcl}
   
   default_tags {{
     tags = {{
@@ -103,14 +133,14 @@ terraform {{
 }}
 
 provider "google" {{
-  region  = "{region}"
+  region  = {region_hcl}
   project = var.gcp_project_id
 }}
 
 resource "google_compute_instance" "llm_server" {{
   name         = "sustainable-llm-node"
   machine_type = "a2-highgpu-1g" # Single A100 node
-  zone         = "{region}-a"
+  zone         = {_hcl_string(f"{region}-a")}
   
   boot_disk {{
     initialize_params {{
@@ -134,7 +164,7 @@ resource "google_compute_instance" "llm_server" {{
 # Generated dynamically by HydraWatch Infrastructure Intelligence
 
 provider "{provider}" {{
-  region = "{region}"
+  region = {region_hcl}
 }}
 
 # Region Score: {score:.1f}/100

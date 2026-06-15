@@ -76,6 +76,21 @@ def test_api_exporters():
     assert "aws" in r.json()["tf"]
 
 
+def test_exporters_reject_injection_payloads():
+    r = client.get("/api/export/kubernetes", params={"regions": "eu-north-1\n        - injected"})
+    assert r.status_code == 400
+
+    r = client.get(
+        "/api/export/terraform",
+        params={
+            "provider": 'aws"\nresource "null_resource" "pwned" {}',
+            "region": "eu-north-1",
+            "score": 80,
+        },
+    )
+    assert r.status_code == 400
+
+
 def test_api_geocode_and_estimates():
     # Test geocode caching
     r = client.get("/api/geocode?q=Mumbai")
@@ -116,4 +131,29 @@ def test_api_geocode_and_estimates():
     assert r.status_code == 200
     assert "xml" in r.headers.get("content-type", "")
     assert f"/e/{est_id}" in r.text
+
+
+def test_sitemap_uses_canonical_host_not_request_host():
+    r = client.get("/sitemap.xml", headers={"host": "evil.example"})
+    assert r.status_code == 200
+    assert "evil.example" not in r.text
+    assert "https://hydra-watch.onrender.com" in r.text
+
+
+def test_api_key_query_parameter_is_ignored():
+    r = client.post(
+        "/api/analyze?api_key=anything",
+        json={
+            "provider": "AWS",
+            "region_code": "ap-south-1",
+            "qps": 10,
+            "avg_tokens": 100,
+            "gpu_type": "A100",
+            "model_name": "LLaMA-3-70B",
+            "user_location": "Mumbai, India",
+            "max_latency_ms": 200,
+        },
+    )
+    assert r.status_code == 200
+    assert r.json()["tenant"]["tenant_name"] == "Guest"
 

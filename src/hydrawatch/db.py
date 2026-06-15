@@ -46,18 +46,20 @@ def init_db() -> None:
                 department TEXT NOT NULL
             )
         """)
-        # Seed default API keys for pre-defined departments
-        cursor = conn.execute("SELECT COUNT(*) as count FROM api_keys")
-        if cursor.fetchone()["count"] == 0:
-            conn.execute(
-                "INSERT INTO api_keys (key, tenant_name, department) VALUES ('hw_cx_key', 'HydraWatch Global', 'Customer Experience')"
-            )
-            conn.execute(
-                "INSERT INTO api_keys (key, tenant_name, department) VALUES ('hw_kp_key', 'HydraWatch Global', 'Knowledge Platform')"
-            )
-            conn.execute(
-                "INSERT INTO api_keys (key, tenant_name, department) VALUES ('hw_dp_key', 'HydraWatch Global', 'Data Platform')"
-            )
+        seed_spec = os.environ.get("HYDRAWATCH_API_KEYS", "").strip()
+        if seed_spec:
+            for entry in seed_spec.split(","):
+                parts = [p.strip() for p in entry.split(":", 2)]
+                if len(parts) != 3 or not all(parts):
+                    continue
+                key, tenant_name, department = parts
+                conn.execute(
+                    """
+                    INSERT OR IGNORE INTO api_keys (key, tenant_name, department)
+                    VALUES (?, ?, ?)
+                    """,
+                    (key, tenant_name, department),
+                )
         conn.commit()
 
 
@@ -149,4 +151,3 @@ def verify_api_key_db(key: str) -> dict | None:
         if row:
             return {"tenant_name": row["tenant_name"], "department": row["department"]}
         return None
-

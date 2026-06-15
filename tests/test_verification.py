@@ -121,13 +121,15 @@ def test_export_configuration():
     assert "aws" in tf
     assert "85.5" in tf
 
+    import pytest
+    with pytest.raises(ValueError):
+        generate_kubernetes_affinity_yaml(["eu-north-1\n- name: injected"])
+    with pytest.raises(ValueError):
+        generate_terraform_provider_tf('aws"\nresource "null_resource" "pwned" {}', "eu-north-1", 85.5)
+
 
 def test_api_key_auth_verification():
     from hydrawatch.db import verify_api_key_db
-    cx = verify_api_key_db("hw_cx_key")
-    assert cx is not None
-    assert cx["department"] == "Customer Experience"
-    
     missing = verify_api_key_db("hw_invalid_key")
     assert missing is None
 
