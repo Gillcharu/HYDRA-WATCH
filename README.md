@@ -160,18 +160,28 @@ cp .env.example .env
 | Variable | Purpose | Default |
 | --- | --- | --- |
 | `DATABASE_URL` | SQLAlchemy connection string | `sqlite:///data/hydrawatch.db` |
+| `ENVIRONMENT` | Runtime mode; set `production` on Render | `development` |
 | `ELECTRICITY_MAPS_API_KEY` | Optional live carbon-intensity lookup | Static regional fallback |
 | `GOOGLE_MAPS_API_KEY` | Optional geocoding provider | OpenStreetMap/Nominatim fallback |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated allowed frontend origins | `https://hydra-watch.onrender.com,http://localhost:5173,http://localhost:8080` |
 | `LOG_LEVEL` | Backend logging level | `INFO` |
 | `HYDRAWATCH_ENABLE_API_DOCS` | Enable `/docs`, `/redoc`, and `/openapi.json` | `false` |
+| `HYDRAWATCH_ENABLE_LEGACY_ROUTES` | Enable legacy `/analyze`, `/gate`, `/validate/all` compatibility routes | `false` in production |
 | `REDIS_URL` | Optional Redis backend for distributed rate limiting | In-memory limiter |
 | `ANALYZE_RATE_LIMIT_MAX` | Max `/api/analyze` requests per IP per minute | `5` |
-| `HYDRAWATCH_REQUIRE_API_KEY` | Require `X-API-Key` for expensive endpoints | `false` |
+| `HYDRAWATCH_REQUIRE_API_KEY` | Require `X-API-Key` for expensive endpoints | `true` in production |
 | `HYDRAWATCH_API_KEYS` | Optional seeded keys as `key:tenant:department` entries | empty |
+| `HYDRAWATCH_ALLOW_PUBLIC_GEOCODING` | Allow unauthenticated live geocoding on cache misses | `false` in production |
 | `HYDRAWATCH_REQUIRE_TURNSTILE` | Require Cloudflare Turnstile on analysis requests | `false` |
 | `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile backend secret | empty |
 | `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile frontend site key | empty |
+
+For Docker Compose, set a local Postgres password before starting:
+
+```bash
+export POSTGRES_PASSWORD="$(openssl rand -base64 24)"
+docker compose up --build
+```
 
 ## API Highlights
 

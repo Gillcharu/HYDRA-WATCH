@@ -16,7 +16,7 @@ from fastapi import FastAPI, HTTPException, Query, Header, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 import time
 import httpx
 
@@ -62,7 +62,13 @@ from hydrawatch.wue_data import get_wue  # noqa: E402
 from sqlalchemy.orm import Session  # noqa: E402
 from hydrawatch.database import init_db, get_db, GeocodeCache, SavedEstimate  # noqa: E402
 
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "development").lower()
+IS_PRODUCTION = ENVIRONMENT in {"prod", "production"}
 ENABLE_API_DOCS = os.environ.get("HYDRAWATCH_ENABLE_API_DOCS", "false").lower() in {"1", "true", "yes"}
+ENABLE_LEGACY_ROUTES = os.environ.get(
+    "HYDRAWATCH_ENABLE_LEGACY_ROUTES",
+    "false" if IS_PRODUCTION else "true",
+).lower() in {"1", "true", "yes"}
 
 app = FastAPI(
     title="HydraWatch API",
@@ -101,7 +107,7 @@ async def security_headers_middleware(request: Request, call_next):
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; "
+        "script-src 'self' https://challenges.cloudflare.com; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src 'self' https://fonts.gstatic.com data:; "
         "img-src 'self' data: https:; "
@@ -132,10 +138,17 @@ ENDPOINT_RATE_LIMITS = {
     "/api/export/terraform": int(os.environ.get("EXPORT_RATE_LIMIT_MAX", "10")),
 }
 REDIS_URL = os.environ.get("REDIS_URL", "").strip()
-REQUIRE_API_KEY_FOR_EXPENSIVE = os.environ.get("HYDRAWATCH_REQUIRE_API_KEY", "false").lower() in {"1", "true", "yes"}
+REQUIRE_API_KEY_FOR_EXPENSIVE = os.environ.get(
+    "HYDRAWATCH_REQUIRE_API_KEY",
+    "true" if IS_PRODUCTION else "false",
+).lower() in {"1", "true", "yes"}
 REQUIRE_TURNSTILE = os.environ.get("HYDRAWATCH_REQUIRE_TURNSTILE", "false").lower() in {"1", "true", "yes"}
 TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY", "").strip()
 ANALYZE_CACHE_TTL = int(os.environ.get("ANALYZE_CACHE_TTL_SECONDS", "300"))
+ALLOW_PUBLIC_GEOCODING = os.environ.get(
+    "HYDRAWATCH_ALLOW_PUBLIC_GEOCODING",
+    "false" if IS_PRODUCTION else "true",
+).lower() in {"1", "true", "yes"}
 ANALYZE_CACHE: dict[str, tuple[float, dict]] = {}
 _REDIS_CLIENT = None
 
@@ -414,6 +427,12 @@ async def geocode(
             logger.error(f"Failed to sync legacy cache to DB: {db_err}")
             db.rollback()
         return cache[key]
+
+    if not ALLOW_PUBLIC_GEOCODING and not REQUIRE_API_KEY_FOR_EXPENSIVE:
+        raise HTTPException(
+            status_code=403,
+            detail="Live geocoding is disabled unless API-key protection is enabled.",
+        )
 
     # 3. Cache miss - fetch live
     google_key = os.environ.get("GOOGLE_MAPS_API_KEY")
@@ -711,36 +730,37 @@ def export_terraform(
         raise HTTPException(400, str(e))
 
 
-# Legacy routes (backward compatible)
-@app.get("/locations")
-def list_locations_legacy():
-    return list_locations()
+# Legacy routes (backward compatible in local/dev only unless explicitly enabled)
+if ENABLE_LEGACY_ROUTES:
+    @app.get("/locations")
+    def list_locations_legacy():
+        return list_locations()
 
 
-@app.post("/analyze")
-async def analyze_legacy(req: AnalyzeRequest, top_n: int = Query(10, ge=1, le=121)):
-    return await analyze(req, top_n)
+    @app.post("/analyze")
+    async def analyze_legacy(req: AnalyzeRequest, top_n: int = Query(10, ge=1, le=121)):
+        return await analyze(req, top_n)
 
 
-@app.get("/validate/all")
-def validate_all_legacy():
-    return validate_all()
+    @app.get("/validate/all")
+    def validate_all_legacy():
+        return validate_all()
 
 
-@app.post("/gate")
-async def deploy_gate_legacy(
-    provider: str = Query("AWS"),
-    region_code: str = Query("ap-south-1"),
-    min_score: float = Query(40.0),
-    min_tier: str = Query("V0"),
-    qps: float = Query(100, ge=1),
-):
-    return await deploy_gate(provider, region_code, min_score, min_tier, qps)
+    @app.post("/gate")
+    async def deploy_gate_legacy(
+        provider: str = Query("AWS"),
+        region_code: str = Query("ap-south-1"),
+        min_score: float = Query(40.0),
+        min_tier: str = Query("V0"),
+        qps: float = Query(100, ge=1),
+    ):
+        return await deploy_gate(provider, region_code, min_score, min_tier, qps)
 
 
-@app.get("/case-study/india-nordic")
-async def case_study_legacy():
-    return await case_study()
+    @app.get("/case-study/india-nordic")
+    async def case_study_legacy():
+        return await case_study()
 
 
 # ── Saved Estimates & Sitemap ──────────────────────────────────────────────────
@@ -749,11 +769,36 @@ class SavedEstimateResponse(BaseModel):
     id: str
     config_data: dict
 
+class SavedEstimatePayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    compare: bool = False
+    tool: str = Field(..., pattern=r"^(ChatGPT|Gemini|Claude|Copilot)$")
+    usage: int = Field(..., ge=1, le=10000)
+    type: str = Field(..., pattern=r"^(simple|long|coding|image)$")
+    loc: Optional[str] = Field(None, min_length=2, max_length=120)
+    lat: Optional[float] = Field(None, ge=-90, le=90)
+    lon: Optional[float] = Field(None, ge=-180, le=180)
+    toolB: Optional[str] = Field(None, pattern=r"^(ChatGPT|Gemini|Claude|Copilot)$")
+    usageB: Optional[int] = Field(None, ge=1, le=10000)
+    typeB: Optional[str] = Field(None, pattern=r"^(simple|long|coding|image)$")
+    locB: Optional[str] = Field(None, min_length=2, max_length=120)
+    latB: Optional[float] = Field(None, ge=-90, le=90)
+    lonB: Optional[float] = Field(None, ge=-180, le=180)
+
+    @field_validator("toolB", "usageB", "typeB", "locB", "latB", "lonB")
+    @classmethod
+    def validate_compare_fields(cls, value, info):
+        if value is not None and not info.data.get("compare", False):
+            raise ValueError("Secondary comparison fields require compare=true")
+        return value
+
 @app.post("/api/estimates", response_model=SavedEstimateResponse)
-def create_saved_estimate(payload: dict, db: Session = Depends(get_db)):
+def create_saved_estimate(payload: SavedEstimatePayload, db: Session = Depends(get_db)):
     import uuid
     est_id = str(uuid.uuid4())
-    db_est = SavedEstimate(id=est_id, config_data=payload)
+    safe_payload = payload.model_dump(exclude_none=True, mode="json")
+    db_est = SavedEstimate(id=est_id, config_data=safe_payload)
     try:
         db.add(db_est)
         db.commit()
@@ -767,6 +812,11 @@ def create_saved_estimate(payload: dict, db: Session = Depends(get_db)):
 
 @app.get("/api/estimates/{estimate_id}", response_model=SavedEstimateResponse)
 def get_saved_estimate(estimate_id: str, db: Session = Depends(get_db)):
+    import uuid
+    try:
+        uuid.UUID(estimate_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Saved estimate not found")
     try:
         db_est = db.query(SavedEstimate).filter(SavedEstimate.id == estimate_id).first()
         if not db_est:
@@ -781,7 +831,7 @@ def get_saved_estimate(estimate_id: str, db: Session = Depends(get_db)):
 from fastapi.responses import Response
 
 @app.get("/sitemap.xml")
-def sitemap(request: Request, db: Session = Depends(get_db)):
+def sitemap(request: Request):
     base_url = os.environ.get("PUBLIC_BASE_URL", "https://hydra-watch.onrender.com").rstrip("/")
     static_routes = [
         "",
@@ -802,20 +852,6 @@ def sitemap(request: Request, db: Session = Depends(get_db)):
             f"    <priority>0.8</priority>\n"
             f"  </url>"
         )
-        
-    try:
-        estimates = db.query(SavedEstimate).order_by(SavedEstimate.created_at.desc()).limit(200).all()
-        for est in estimates:
-            url = f"{base_url}/e/{est.id}"
-            xml_entries.append(
-                f"  <url>\n"
-                f"    <loc>{escape(url)}</loc>\n"
-                f"    <changefreq>monthly</changefreq>\n"
-                f"    <priority>0.6</priority>\n"
-                f"  </url>"
-            )
-    except Exception as e:
-        logger.error(f"Error querying saved estimates for sitemap: {e}")
 
     xml_content = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'

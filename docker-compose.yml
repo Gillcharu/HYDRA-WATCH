@@ -8,8 +8,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DATABASE_URL=postgresql://hydra_user:hydra_pass@db:5432/hydrawatch_db
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-hydra_user}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your shell or .env file}@db:5432/${POSTGRES_DB:-hydrawatch_db}
       - CORS_ALLOWED_ORIGINS=http://localhost:8080,http://127.0.0.1:8080
+      - ENVIRONMENT=${ENVIRONMENT:-development}
       - LOG_LEVEL=INFO
     depends_on:
       - db
@@ -20,9 +21,9 @@ services:
     image: postgres:15-alpine
     container_name: hydrawatch_postgres_db
     environment:
-      - POSTGRES_USER=hydra_user
-      - POSTGRES_PASSWORD=hydra_pass
-      - POSTGRES_DB=hydrawatch_db
+      - POSTGRES_USER=${POSTGRES_USER:-hydra_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your shell or .env file}
+      - POSTGRES_DB=${POSTGRES_DB:-hydrawatch_db}
     ports:
       - "5432:5432"
     volumes:

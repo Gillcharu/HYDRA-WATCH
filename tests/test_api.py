@@ -137,7 +137,17 @@ def test_api_geocode_and_estimates():
     r = client.get("/sitemap.xml")
     assert r.status_code == 200
     assert "xml" in r.headers.get("content-type", "")
-    assert f"/e/{est_id}" in r.text
+    assert f"/e/{est_id}" not in r.text
+
+    huge_config = {
+        "compare": False,
+        "tool": "ChatGPT",
+        "usage": 25,
+        "type": "simple",
+        "unexpected": "x" * 1000,
+    }
+    r = client.post("/api/estimates", json=huge_config)
+    assert r.status_code == 422
 
 
 def test_sitemap_uses_canonical_host_not_request_host():
@@ -163,4 +173,3 @@ def test_api_key_query_parameter_is_ignored():
     )
     assert r.status_code == 200
     assert r.json()["tenant"]["tenant_name"] == "Guest"
-
