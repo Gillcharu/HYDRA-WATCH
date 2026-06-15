@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import sys
 from pathlib import Path
@@ -78,17 +79,17 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "case-study":
         from hydrawatch.case_study import run_india_vs_nordic_case_study
-        cs = run_india_vs_nordic_case_study()
+        cs = asyncio.run(run_india_vs_nordic_case_study())
         print(cs["conclusion"])
         print(json.dumps(cs["findings"], indent=2))
         return 0 if cs["pass"] else 1
 
     if args.command == "gate":
         from hydrawatch.gate import run_deploy_gate
-        gr = run_deploy_gate(
+        gr = asyncio.run(run_deploy_gate(
             args.provider, args.region, args.min_score, args.min_tier,
             args.qps, args.tokens, args.gpu, args.model,
-        )
+        ))
         print(gr.message)
         if gr.recommendation:
             print(f"Recommendation: {gr.recommendation}")
@@ -106,7 +107,7 @@ def main(argv: list[str] | None = None) -> int:
             args.max_latency = 150
             args.cost_tolerance = 10.0
 
-        result = full_analysis(
+        result = asyncio.run(full_analysis(
             provider=args.provider,
             region_code=args.region,
             qps=args.qps,
@@ -116,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
             user_location=args.user_location,
             max_latency_ms=args.max_latency,
             cost_tolerance_pct=args.cost_tolerance,
-        )
+        ))
         print_analysis(result)
         return 0
 
