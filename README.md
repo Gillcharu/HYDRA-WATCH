@@ -164,6 +164,13 @@ cp .env.example .env
 | `GOOGLE_MAPS_API_KEY` | Optional geocoding provider | OpenStreetMap/Nominatim fallback |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated allowed frontend origins | `*` |
 | `LOG_LEVEL` | Backend logging level | `INFO` |
+| `REDIS_URL` | Optional Redis backend for distributed rate limiting | In-memory limiter |
+| `ANALYZE_RATE_LIMIT_MAX` | Max `/api/analyze` requests per IP per minute | `5` |
+| `HYDRAWATCH_REQUIRE_API_KEY` | Require `X-API-Key` for expensive endpoints | `false` |
+| `HYDRAWATCH_API_KEYS` | Optional seeded keys as `key:tenant:department` entries | empty |
+| `HYDRAWATCH_REQUIRE_TURNSTILE` | Require Cloudflare Turnstile on analysis requests | `false` |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile backend secret | empty |
+| `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile frontend site key | empty |
 
 ## API Highlights
 

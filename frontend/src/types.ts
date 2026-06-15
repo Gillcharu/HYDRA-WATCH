@@ -65,6 +65,8 @@ export interface AnalyzeRequest {
   workload_mode?: string;
   quantization?: string;
   framework?: string;
+  live_telemetry?: boolean;
+  turnstile_token?: string;
 }
 
 export interface AnalyzeResult {

@@ -7,6 +7,14 @@ import { FadeIn } from "../components/AnimatedCounter";
 import { api } from "../lib/api";
 import type { AnalyzeRequest, AnalyzeResult, Meta, Region, Scenario } from "../types";
 
+declare global {
+  interface Window {
+    hydraTurnstileCallback?: (token: string) => void;
+  }
+}
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+
 function formatRegionDisplayName(regionCode: string, regionName: string, country: string, city?: string): string {
   let geo = "";
   if (city && country) {
@@ -142,6 +150,7 @@ export function PlatformPage() {
   const [activeWorkload, setActiveWorkload] = useState(DETECTED_WORKLOADS[0].id);
   const [refOpen, setRefOpen] = useState(false);
   const [apiKey, setApiKey] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [liveTelemetry, setLiveTelemetry] = useState(false);
 
   // New connection simulation states
@@ -234,6 +243,21 @@ export function PlatformPage() {
   }, []);
 
   useEffect(() => {
+    if (!TURNSTILE_SITE_KEY) return;
+    window.hydraTurnstileCallback = (token: string) => setTurnstileToken(token);
+    if (!document.querySelector('script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]')) {
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+    return () => {
+      delete window.hydraTurnstileCallback;
+    };
+  }, []);
+
+  useEffect(() => {
     api.regions(params.provider).then((d) => {
       setRegions(d.regions);
       if (d.regions.length && !d.regions.some((r) => r.region_code === params.region_code)) {
@@ -246,7 +270,7 @@ export function PlatformPage() {
     setLoading(true);
     setError("");
     try {
-      setResult(await api.analyze({ ...params, live_telemetry: liveTelemetry }, 6, apiKey));
+      setResult(await api.analyze({ ...params, live_telemetry: liveTelemetry, turnstile_token: turnstileToken || undefined }, 6, apiKey));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Analysis failed");
     } finally {
@@ -954,6 +978,18 @@ export function PlatformPage() {
                       onChange={(e) => setLiveTelemetry(e.target.checked)}
                     />
                   </div>
+                  {TURNSTILE_SITE_KEY && (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                      <div
+                        className="cf-turnstile"
+                        data-sitekey={TURNSTILE_SITE_KEY}
+                        data-callback="hydraTurnstileCallback"
+                      />
+                      <p className="mt-2 text-[10px] text-slate-500">
+                        Human verification helps protect public analysis capacity from automated spam.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </details>
               <button type="button" className="btn-glow w-full" onClick={run} disabled={loading}>

@@ -6,6 +6,8 @@ import os
 import json
 import logging
 import sys
+import hashlib
+import copy
 from html import escape
 from pathlib import Path
 from typing import Optional
@@ -93,7 +95,38 @@ RATE_LIMIT_SWEEP_INTERVAL = 60
 RATE_LIMIT_LAST_SWEEP = 0.0
 
 ANALYZE_RATE_LIMITS = {}
-ANALYZE_LIMIT_MAX = 10  # maximum requests to /api/analyze per client IP per minute
+ANALYZE_LIMIT_MAX = int(os.environ.get("ANALYZE_RATE_LIMIT_MAX", "5"))
+ENDPOINT_RATE_LIMITS = {
+    "/api/analyze": ANALYZE_LIMIT_MAX,
+    "/api/gate": int(os.environ.get("GATE_RATE_LIMIT_MAX", "10")),
+    "/api/geocode": int(os.environ.get("GEOCODE_RATE_LIMIT_MAX", "20")),
+    "/api/export/kubernetes": int(os.environ.get("EXPORT_RATE_LIMIT_MAX", "10")),
+    "/api/export/terraform": int(os.environ.get("EXPORT_RATE_LIMIT_MAX", "10")),
+}
+REDIS_URL = os.environ.get("REDIS_URL", "").strip()
+REQUIRE_API_KEY_FOR_EXPENSIVE = os.environ.get("HYDRAWATCH_REQUIRE_API_KEY", "false").lower() in {"1", "true", "yes"}
+REQUIRE_TURNSTILE = os.environ.get("HYDRAWATCH_REQUIRE_TURNSTILE", "false").lower() in {"1", "true", "yes"}
+TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY", "").strip()
+ANALYZE_CACHE_TTL = int(os.environ.get("ANALYZE_CACHE_TTL_SECONDS", "300"))
+ANALYZE_CACHE: dict[str, tuple[float, dict]] = {}
+_REDIS_CLIENT = None
+
+
+def _get_redis_client():
+    global _REDIS_CLIENT
+    if not REDIS_URL:
+        return None
+    if _REDIS_CLIENT is not None:
+        return _REDIS_CLIENT
+    try:
+        import redis  # type: ignore
+        _REDIS_CLIENT = redis.Redis.from_url(REDIS_URL, decode_responses=True)
+        _REDIS_CLIENT.ping()
+        return _REDIS_CLIENT
+    except Exception as e:
+        logger.warning(f"Redis rate limiter unavailable, falling back to in-memory limits: {e}")
+        _REDIS_CLIENT = False
+        return None
 
 
 def _sweep_rate_limits(now: float) -> None:
@@ -119,6 +152,34 @@ async def rate_limit_middleware(request: Request, call_next):
         client_ip = request.client.host if request.client else "unknown"
         now = time.time()
         _sweep_rate_limits(now)
+
+        endpoint_limit = ENDPOINT_RATE_LIMITS.get(request.url.path)
+        if endpoint_limit:
+            redis_client = _get_redis_client()
+            if redis_client:
+                key = f"rl:{request.url.path}:{client_ip}:{int(now // RATE_LIMIT_WINDOW)}"
+                try:
+                    count = redis_client.incr(key)
+                    if count == 1:
+                        redis_client.expire(key, RATE_LIMIT_WINDOW + 5)
+                    if count > endpoint_limit:
+                        return JSONResponse(
+                            status_code=429,
+                            content={"detail": f"Rate limit exceeded. Max {endpoint_limit} requests per minute for this endpoint."},
+                        )
+                except Exception as e:
+                    logger.warning(f"Redis rate limit check failed, using in-memory fallback: {e}")
+            else:
+                endpoint_key = f"{request.url.path}:{client_ip}"
+                endpoint_history = ANALYZE_RATE_LIMITS.get(endpoint_key, [])
+                endpoint_history = [t for t in endpoint_history if now - t < RATE_LIMIT_WINDOW]
+                if len(endpoint_history) >= endpoint_limit:
+                    return JSONResponse(
+                        status_code=429,
+                        content={"detail": f"Rate limit exceeded. Max {endpoint_limit} requests per minute for this endpoint."},
+                    )
+                endpoint_history.append(now)
+                ANALYZE_RATE_LIMITS[endpoint_key] = endpoint_history
         
         # 1. Stricter check for resource-intensive /api/analyze endpoint (max 10 req/min)
         if request.url.path == "/api/analyze":
@@ -155,6 +216,16 @@ async def rate_limit_middleware(request: Request, call_next):
 GEOCODE_CACHE_PATH = ROOT / "data" / "geocode_cache.json"
 
 
+async def enforce_expensive_endpoint_key(x_api_key: Optional[str] = Header(None)) -> None:
+    if not REQUIRE_API_KEY_FOR_EXPENSIVE:
+        return
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="X-API-Key header required for this endpoint")
+    from hydrawatch.db import verify_api_key_db
+    if not verify_api_key_db(x_api_key):
+        raise HTTPException(status_code=401, detail="Invalid API Key credentials")
+
+
 class AnalyzeRequest(BaseModel):
     provider: str = Field(..., examples=["AWS"])
     region_code: str = Field(..., examples=["ap-south-1"])
@@ -169,6 +240,7 @@ class AnalyzeRequest(BaseModel):
     quantization: str = Field("FP16")
     framework: str = Field("standard")
     live_telemetry: Optional[bool] = Field(False)
+    turnstile_token: Optional[str] = Field(None, exclude=True)
 
 
 # ── API routes (registered before SPA catch-all) ─────────────────────────────
@@ -251,7 +323,11 @@ def list_locations():
 
 
 @app.get("/api/geocode")
-async def geocode(q: str = Query(..., min_length=2), db: Session = Depends(get_db)):
+async def geocode(
+    q: str = Query(..., min_length=2),
+    db: Session = Depends(get_db),
+    _: None = Depends(enforce_expensive_endpoint_key),
+):
     key = q.strip().casefold()
     
     # 1. Check database cache
@@ -393,15 +469,91 @@ async def get_tenant_context(
     return {"tenant_name": "Guest", "department": "Guest Operations"}
 
 
+async def get_required_tenant_context(x_api_key: Optional[str] = Header(None)):
+    tenant = await get_tenant_context(x_api_key)
+    if tenant.get("department") == "Guest Operations":
+        raise HTTPException(status_code=401, detail="X-API-Key header required for this endpoint")
+    return tenant
+
+
+async def verify_turnstile(token: Optional[str], remote_ip: str | None = None) -> None:
+    if not REQUIRE_TURNSTILE:
+        return
+    if not TURNSTILE_SECRET_KEY:
+        raise HTTPException(status_code=500, detail="Turnstile verification is enabled but not configured")
+    if not token:
+        raise HTTPException(status_code=403, detail="Human verification required")
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.post(
+                "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+                data={
+                    "secret": TURNSTILE_SECRET_KEY,
+                    "response": token,
+                    "remoteip": remote_ip or "",
+                },
+            )
+        data = response.json()
+    except Exception as e:
+        logger.warning(f"Turnstile verification failed: {e}")
+        raise HTTPException(status_code=403, detail="Human verification failed")
+    if not data.get("success"):
+        raise HTTPException(status_code=403, detail="Human verification failed")
+
+
+def _analyze_cache_key(req: AnalyzeRequest, top_n: int) -> str:
+    payload = req.model_dump(exclude={"turnstile_token"}, mode="json")
+    payload["top_n"] = top_n
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _get_analyze_cache(key: str) -> dict | None:
+    if ANALYZE_CACHE_TTL <= 0:
+        return None
+    item = ANALYZE_CACHE.get(key)
+    if not item:
+        return None
+    expires_at, payload = item
+    if time.time() >= expires_at:
+        ANALYZE_CACHE.pop(key, None)
+        return None
+    cached = copy.deepcopy(payload)
+    cached["cached"] = True
+    return cached
+
+
+def _set_analyze_cache(key: str, payload: dict) -> None:
+    if ANALYZE_CACHE_TTL <= 0:
+        return
+    ANALYZE_CACHE[key] = (time.time() + ANALYZE_CACHE_TTL, copy.deepcopy(payload))
+    if len(ANALYZE_CACHE) > 256:
+        now = time.time()
+        stale = [k for k, (exp, _) in ANALYZE_CACHE.items() if exp <= now]
+        for k in stale:
+            ANALYZE_CACHE.pop(k, None)
+        while len(ANALYZE_CACHE) > 256:
+            ANALYZE_CACHE.pop(next(iter(ANALYZE_CACHE)))
+
+
 @app.post("/api/analyze")
 async def analyze(
     req: AnalyzeRequest,
     top_n: int = Query(10, ge=1, le=121),
     tenant: dict = Depends(get_tenant_context),
+    request: Request = None,
 ):
+    if REQUIRE_API_KEY_FOR_EXPENSIVE and tenant.get("department") == "Guest Operations":
+        raise HTTPException(status_code=401, detail="X-API-Key header required for analysis")
+    await verify_turnstile(req.turnstile_token, request.client.host if request and request.client else None)
     if not isinstance(tenant, dict):
         tenant = {"tenant_name": "Guest", "department": "Guest Operations"}
     logger.info(f"Analyze request for Tenant: {tenant['tenant_name']} (Dept: {tenant['department']})")
+    cache_key = _analyze_cache_key(req, int(top_n))
+    cached = _get_analyze_cache(cache_key)
+    if cached:
+        cached["tenant"] = tenant
+        return cached
     try:
         result = await full_analysis(
             provider=req.provider.upper(),
@@ -425,6 +577,7 @@ async def analyze(
     payload["multicloud"] = payload["multicloud"][:limit]
     payload["alternatives"] = payload["alternatives"][:limit]
     payload["tenant"] = tenant
+    _set_analyze_cache(cache_key, payload)
     return payload
 
 
@@ -462,6 +615,8 @@ async def deploy_gate(
     live_telemetry: bool = Query(False),
     tenant: dict = Depends(get_tenant_context),
 ):
+    if REQUIRE_API_KEY_FOR_EXPENSIVE and tenant.get("department") == "Guest Operations":
+        raise HTTPException(status_code=401, detail="X-API-Key header required for deploy gate")
     if not isinstance(tenant, dict):
         tenant = {"tenant_name": "Guest", "department": "Guest Operations"}
     logger.info(f"Deploy gate request for Tenant: {tenant['tenant_name']} (Dept: {tenant['department']})")
@@ -487,7 +642,10 @@ async def case_study():
 
 
 @app.get("/api/export/kubernetes")
-def export_kubernetes(regions: str = Query(..., description="Comma-separated region names")):
+def export_kubernetes(
+    regions: str = Query(..., description="Comma-separated region names"),
+    _: None = Depends(enforce_expensive_endpoint_key),
+):
     region_list = [r.strip() for r in regions.split(",") if r.strip()]
     if not region_list:
         raise HTTPException(400, "Must provide at least one valid region")
@@ -503,6 +661,7 @@ def export_terraform(
     provider: str = Query(..., examples=["AWS", "GCP"]),
     region: str = Query(..., examples=["us-east-1", "eu-north-1"]),
     score: float = Query(50.0),
+    _: None = Depends(enforce_expensive_endpoint_key),
 ):
     from hydrawatch.export import generate_terraform_provider_tf
     try:
