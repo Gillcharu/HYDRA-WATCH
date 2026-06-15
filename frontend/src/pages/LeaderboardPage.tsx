@@ -52,7 +52,7 @@ export function LeaderboardPage() {
 
   const top3 = board.slice(0, 3);
   const chartData = board.slice(0, 10).map((b) => ({
-    name: b.region_name.split("(")[0].trim().slice(0, 14),
+    name: b.region_name,
     score: b.sustainability_score,
   }));
 

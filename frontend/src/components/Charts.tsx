@@ -86,7 +86,7 @@ export function LeaderboardBars({ data }: { data: { name: string; score: number 
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data} layout="vertical" margin={{ left: 4, right: 16 }}>
         <XAxis type="number" domain={[0, 100]} hide />
-        <YAxis type="category" dataKey="name" width={100} tick={{ fill: "#94a3b8", fontSize: 11 }} />
+        <YAxis type="category" dataKey="name" width={160} tick={{ fill: "#94a3b8", fontSize: 11 }} />
         <Tooltip contentStyle={tooltipStyle} />
         <Bar dataKey="score" radius={[0, 6, 6, 0]}>
           {data.map((_, i) => (
