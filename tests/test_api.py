@@ -13,6 +13,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
+# Ensure dummy frontend/dist/index.html exists so FastAPI SPA routes are registered during testing
+dist_dir = ROOT / "frontend" / "dist"
+dist_dir.mkdir(parents=True, exist_ok=True)
+dummy_index = dist_dir / "index.html"
+if not dummy_index.exists():
+    dummy_index.write_text("<!DOCTYPE html><html><body>Dummy</body></html>")
+
 from api.main import app  # noqa: E402
 
 client = TestClient(app)
